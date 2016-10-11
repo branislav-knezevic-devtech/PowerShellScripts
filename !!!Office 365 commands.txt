@@ -1,0 +1,80 @@
+$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outloo
+k.com/powershell/ -Credential $LiveCred -Authentication Basic -AllowRedirection
+Import-PSSession $session - connect from powershell
+
+
+Set-Mailbox <whose email> -ForwardingSmtpAddress <to who> -DeliverToMailboxAndForward $false - forward/redirect mailova
+
+Set-mailbox <whose email> -ForwardingSmtpAddress $null - remove forwarding
+
+C:\Program Files (x86)\Common Files\microsoft shared\OFFICE14>osaui.exe /f - pokretanje activation wizarda na klijentskom racunaru za aktivaciju office-a
+
+
+cscript.exe "c:\program files (x86)\microsoft office\office14\"ospp.vbs /dstatus - proveravanje statusa licence na klijentskom racunaru
+
+
+Set-CASMailbox <email> -OWAEnabled $false - enable/disable OWA
+
+
+connect-msolService
+Get-MsolUser | Set-MsolUser -PasswordNeverExpires $true - disable password expiration
+
+
+Get-SystemMessage
+Get-SystemMessage –Original >c:\DSNOriginal.txt get list of NDRs
+
+
+Set-MsolUserPrincipalName -NewUserPrincipalName [new user ID as email address]
+-UserPrincipalName [old user ID as email address] - chage of user ID
+
+
+Set-Mailbox -Identity email@address.com -Type "shared" -ProhibitSendReceiveQuota 5GB -ProhibitSendQuota 4.75GB -IssueWarningQuota 4.5GB - converting mailbox to shared
+
+Set-Mailbox -Identity email@address.com -type:regular - Converting mailbox from shared to normal
+
+
+PS C:\Scripts> $MSOLSKU=(Get-MsolUser -UserPrincipalName email@address.com).Licenses[0].AccountSkuId
+PS C:\Scripts> Set-MsolUserLicense -UserPrincipalName email@address.com -RemoveLicenses $msolsku - removing license from the user
+
+
+Get-mailboxpermission "am@accendomarkets.com" | where { ($_.IsInherited -eq $false) -and -not ($_.User -like "NT AUTHORITY\SELF") } |Select Identity, user, AccessRights - vraca listu svih usera koji imaju full mailbox permisije nad zeljenim mailboxom
+
+
+Add-MailboxPermission lh@accendomarkets.com -User cm@accendomarkets.com -AccessRights FullAccess - full mailbox access
+
+
+Set-Mailbox <user id> -EmailAddresses SMTP:new@address.com,secondary@address.com - changing users email address
+
+
+New-Mailbox -Name "Accounts" -Alias accounts -Shared
+Set-Mailbox accounts -ProhibitSendReceiveQuota 5gb -ProhibitSendQuota 4.75gb -IssueWarningQuota 4.5gb
+Add-MailboxPermission accounts@roseuniacke.com -User calandre@roseuniacke.com -AccessRights FullAccess
+Add-RecipientPermission accounts -Trustee calandre@roseuniacke.com -AccessRights SendAs - createing shared mailbox and granting permissions to it
+
+
+Set-Mailbox "jessica" -RetentionPolicy "custom retention policy"
+Start-ManagedFolderAssistant -Identity "jessica@lgalondon.com" - applying custom policy to mailbox ad running folder assistant so it would be applied instantly
+
+
+Get-Mailbox "biddy" | fl retentionPolicy - check which policy is applied to mailbox
+
+
+Get-MailboxStatistics "biddy" -archive | Format-List displayname,
+storagelimitstatus,totalitemsize,totoaldeleteditemsize,itemcount,deleteditemcount - check ammount of emails stored in archive
+
+
+Get-Mailbox alexandra@lgalondon.com | fl *archive* - get statistisc for archive mailbox
+
+
+remove-MoveRequest -Identity email@address.com - cancel move request
+get-MoveRequest - it will show list of move requests in progress. 
+
+Set-MailboxAutoReplyConfiguration email@address.com -AutoReplyState enabled -ExternalAudience all -InternalMessage "Out of office text" -ExternalMessage "Out of office text" - Out of office
+
+Set-Mailbox –Identity biddy@lgamanagement.com -ArchiveQuota 50GB -ArchiveWarningQuota 48GB
+
+Get-Mailbox -ResultSize unlimited -Filter {(RecipientTypeDetails -eq 'UserMailbox') -and (Alias -ne 'cm@accendomarkets.com' )} | get-MailboxPermission -User cm@accendomarkets.com | fl - get list of mailboxes on which a user (cm@accendomarkets.com) has full access
+
+Get-Mailbox -ResultSize unlimited -Filter {(RecipientTypeDetails -eq 'UserMailbox') -and (Alias -ne 'cm@accendomarkets.com' )} | Remove-MailboxPermission -User cm@accendomarkets.com -AccessRights fullaccess -InheritanceType all - grant full mailbox access to all users for cm@accendomarkets.com
+
+Get-Mailbox |% {Get-MailboxFolderPermission -Identity ($_.Alias + ":\calendar") -user jane.davidson  -erroraction 'silentlycontinue' } | Select Identity, FolderName, User, AccessRights | ft -AutoSize - da se vidi nad cijim sve kalendarima odredjeni user ima pristup

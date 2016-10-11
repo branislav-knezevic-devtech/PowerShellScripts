@@ -1,0 +1,65 @@
+taskkill /f /pid 10456 - ubija task, pokrene se cmd kao admin i broj na kraju je broj pida koji treba da se ubije
+
+vssadmin list writers - izlistava stvari koje backupuje swadow copy. ukoliko neki failuje resetuje se odgovrarajuci servis
+
+Get-MailboxStatistics | select TotalItemSize, DisplayName | Format-Table - PWshell - exchange 2007 i 2010 za izlistavanje velicine mailobxova
+
+wmic csproduct get vendor,name,identifyingnumber - cmd kao admin za service tag i cname
+
+w32tm /query /status - provera vremenskog izvora na DC sa PDC
+
+wbadmin start backup -include:e: -backupTarget:f: -vssfull - backup partition E to F
+
+wbadmin get versions -backuptarget:w: - prikazuje dostupne verzije shadow kopija na zeljenom disku (w:)
+
+wbadmin delete systemstatebackup –keepversions:10 - brise windows backupe osim zadnjih 10
+
+wbadmin delete systemstatebackup –deleteOldest - brise najstariji windows backup
+
+vssadmin resize shadowstorage /on=e: /for=e: /maxsize=10gb - odredjivanje velicine shadow file-a
+
+powercfg.exe /hibernate off - iskljucuje sve power saving feature. 
+
+Add-DistributionGroupMember -Identity $Identity -Member $Members -BypassSecurityGroupManagerCheck - add members to distribution group
+
+Set-RemoteDomain Default -TNEFEnabled $false - to disable winmail.dat sending from office 365 in office 2011.
+
+tasklist /s servername
+ 
+note PID number
+ 
+taskkill /s servername /f /pid pidnumber - ubijanje taska na remote serveru
+
+Add-PublicFolderClientPermission -Identity "\Marketing\West Coast" -AccessRights PublishingEditor -User Kim - dodavanje permisija za public foldere
+
+add-MailboxFolderPermission roomname:\calendar -User username -AccessRights LevelOfAccess (eg Editor) - dodeljivanje permisija na kalendare za room mailboxe
+
+
+msinfo32 - hardware details
+
+Add-MailboxFolderPermission <mailbox>:\Calendar –User <Mailbox-that-will-have-access> –AccessRights <Editor,Owner,PublishingEditor,PublishingAuthor,Author,NonEditingAuthor,Reviewer,Contributor>
+
+get-mailpublicfolder name@domain.com | get-publicfolderstatistics | select AdminDisplayName,FolderPath - prikazuje putanju do public foldera
+
+rundll32.exe user32.dll, LockWorkStation - lock XP computer
+
+cmd.exe /k %windir%\System32\reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 0 /f - enable UAC
+
+cmd.exe /k %windir%\System32\reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 1 /f - disable UAC
+
+wmic.exe /node:IP-or-HostName ComputerSystem Get UserName - provera ulogovanog usera
+
+Set-ContentFilterConfig -BypassedSenders simon@spinnakerprojects.com - dodavanje usera na bypass sender listu na exchange
+Get-ContentFilterConfig | fl za proveru
+
+Get-aduser vpopovic -Properties * - get user properties
+
+Get-Recipient -Identity user@domain.com - locate an email in AD
+
+
+set
+whoami
+hostname
+systeminfo
+net config workstation
+dir /s - search u svim folderima

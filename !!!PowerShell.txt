@@ -1,0 +1,92 @@
+Get-Command -Noun "service" - lists all commands that have word service in them
+get-help <command> (or any other function) - returns help for current command
+help <command> -example - shows example of that command
+help <command> -detailed/-full
+[int]$xxx = <some number> ties this variable to this number - this can't be changed within this session
+[string] $xxx = <some string> same thing but for a string
+commands for strings -Like/-Match/-NotLike/-NotMatch
+clear-variable -name <name> - cleares the variable data
+remove-variable -name <name> - remvoes the variable compleatly
+$variable = @"text text new line text..."@ - here string for large blocks of text
+Get-Service eventlog | gm (or Get-member) - more detailed list of attribudes than | fl
+Get-Service | Where-Object {($_.StartType -eq "Automatic") -and ($_.Status -eq "Stopped")} | Select Name,Start - using where-object
+show-command <cmdlet> - returns UI for any command
+
+(get-item "HKLM:\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters").GetValue("HostName") - vraca ime hosta na kojem se VM nalazi
+
+$SessionOptions = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck - skim cert check when connecting
+
+Get-Mailbox -ResultSize unlimited | Get-MailboxStatistics | sort-object TotalItemSize -Descending | Select-Object DisplayName,TotalItemSize - prikazuje listu mailboxa sortiranih po velicini od najveceg ka najmanjem
+
+Get-DistributionGroup -OrganizationalUnit bk-test | Set-DistributionGroup -RequireSenderAuthenticationEnabled $false - Enable DGs from specific OU to receive external emails
+
+New-ManagementRoleAssignment -Name "<custom name>" -SecurityGroup "<some existing group eg Discovery management>" -Role "Mailbox Import Export" - for delete content permissions
+Search-Mailbox -Identity "user.name" -DeleteContent - deleting content of a mailbox THIS WILL LEAVE ALL CUSTOM SUBFOLDERS
+
+New-MailboxImportRequest -Mailbox user.name -FilePath \\servername\path\file.pst -TargetRootFolder FolderName - imports pst file to specific folder of requested user
+New-MailboxImportRequest -Mailbox ebony.tott -FilePath \\pademocas2\C$\temp\kim_ward\kim_ward\kim_ward_000_1_2.pst -TargetRootFolder SentItems
+New-MailboxImportRequest -Mailbox ila.lockamy -FilePath \\pademocas2\c$\temp\outlook-sent_items.pst -TargetRootFolder "#SentItems#" -BadItemLimit 500 -AcceptLargeDataLoss - to skip errors, if any
+
+Get-MailboxImportRequestStatistics -Identity user.name\ImportName - shows the statistic of requested job
+Get-MailboxImportRequestStatistics -Identity ebony.tott\mailboximport3
+Get-MailboxImportRequest -Status Complete/InProgress/Queued/Failed - returns only jobs with specific status
+Get-MailboxImportRequest -Status Completed | Remove-MailboxImportRequest - removes all jobs with status complete from the list
+Get-MailboxImportRequest -ResultSize unlimited | Get-MailboxImportRequestStatistics | ft TargetMailboxIdentity,Status,name,percentcomplete - get list of all import requests
+
+Get-MailboxImportRequest | Get-MailboxImportRequestStatistics -IncludeReport | fl >C:\Temp\report.txt - get log if job fails
+
+Get-MailboxStatistics -Identity user.name | ft DisplayName,TotalItemSize,ItemCount - check status of items in mailbox
+
+Get-ADUser -Filter * -SearchScope Subtree -SearchBase "OU=BK-test,DC=demouk,DC=local" | Set-ADAccountPassword -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "m1cr0s0ft$" -Force) - resets passwords for all users in specific OU
+
+
+
+Get-ADDomainController -Filter {Site -eq 'Default-First-Site-Name'} | FT Name,IsGlobalCatalog - returns list of Global Catalog servers
+
+Get-Mailbox | Get-MailboxPermission | where { ($_.IsInherited -eq $false) -and -not ($_.User -like “NT AUTHORITY\SELF”) } - list of mailboxes with explicitly assigned permissions
+
+get-wmiobject Win32_Product | Format-Table IdentifyingNumber, Name, LocalPackage - get GUIDs for installed apps
+
+###################
+##### Hyper V #####
+###################
+
+Get-VM
+Get-VM -VMName "exchange 2007 sp1 x64" | fl
+Get-VMSnapshot -VMName "exchange 2007 sp1 x64" | fl
+Get-VM -Name "exchange 2007 sp1 x64" | Get-VMSnapshot | fl
+Get-VM -Name "exchange 2007 sp1 x64" | Remove-VMSnapshot -Name "Exchange 2007 SP1 x64 - (3/13/2014 - 8:31:14 AM)"
+Get-VM -VMName "exchange 2007 sp1 x64" | Get-VMHardDiskDrive | Optimize-VHD - compact VHD
+
+#################
+##### A W S #####
+#################
+
+$env:PSModulePath = $env:PSModulePath + ";C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell"
+Initialize-AWSDefaults - start a session
+
+(Get-EC2Instance -InstanceId i-12345678).Instances - shows all data for selected instance
+(Get-EC2Instance).Instances - get more info for all instances
+(Get-EC2Instance | Select -First 1).Instances - select just first result
+$name = ((get-ec2instance)[0].RunningInstance[0].Tag | select-object Value).Value - $name returns Instance Tag
+
+
+(Get-EC2SecurityGroup -GroupName "group name").IpPermissions - get IP permissions for certain group
+
+$groupid = (Get-EC2SecurityGroup -GroupName "Group Name").GroupId
+$ip1 = new-object Amazon.EC2.Model.IpPermission
+$ip1.IpProtocol = "tcp"
+$ip1.FromPort = 23
+$ip1.ToPort = 23
+$ip1.IpRanges.Add("109.92.130.78/32")
+$ip2 = new-object Amazon.EC2.Model.IpPermission
+$ip2.IpProtocol = "tcp"
+$ip2.FromPort = 443
+$ip2.ToPort = 443
+$ip2.IpRanges.Add("109.92.130.78/32")
+Grant-EC2SecurityGroupIngress -GroupId $groupid -IpPermissions @( $ip1, $ip2 ) - set IP permissions for a grup
+
+$AWSHistory.Commands - history of commands which were ran for AWS
+
+Get-AWSRegion | % { Get-EC2Image -Owner self -Region $_ } - Get-AWSRegions and for each region for each region get image whose owner am I (Self) and list property for each region ($_)
+

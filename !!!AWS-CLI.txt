@@ -1,0 +1,1 @@
+aws sts decode-authorization-message --encoded-message yv16T_dd293 --profile cmp-production - decode error message
