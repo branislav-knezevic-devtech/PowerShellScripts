@@ -11,12 +11,15 @@ ForEach ( $Region in $Regions )
         $InstancesCount = $Instances.count 
         if ($InstancesCount -gt 0)
         { 
+            <#
             $InstanceProperties = @{RegionName = $RegionName
                                     RegionStatus = 'Available'
                                     InstanceID = $Instances.imageid
                                     InstanceType = $Instances.InstanceType
                                     KeyName = $Instances.KeyName
-                                    LaunchTime = $Instances.LaunchTime} 
+                                    LaunchTime = $Instances.LaunchTime}
+            #>
+            $InstanceProperties = $Instances | select InstanceID,InstanceType,KeyName,LaunchTime | fl
         }
     }
     catch
@@ -50,3 +53,5 @@ ForEach ( $Region in $Regions )
         }
     }
 }
+
+# for output play with simple select, maybe as | fl
