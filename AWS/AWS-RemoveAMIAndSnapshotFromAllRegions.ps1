@@ -14,12 +14,17 @@ ForEach ( $Region in $Regions )
 	{
         $ImageForRemoval = (Get-EC2Image | where { $_.name -like $ImageName }).imageid
         Unregister-EC2Image -ImageId $ImageForRemoval
+        Write-Output "Image $ImageForRemoval has been unregistered"
     }
-	else { Write-Host "Image $ImageForRemoval which is a copy of $ImageName was not found in $RegionName" }
+	else 
+    { 
+        Write-Out "Image $ImageForRemoval which is a copy of $ImageName was not found in $RegionName" 
+    }
     if ( (Get-EC2Snapshot).Description -like "*$ImageID*" ) 
 	{
         $SnapshotForRemoval = (Get-EC2Snapshot | where { $_.Description -like "*$ImageID*" }).SnapshotId
         Remove-EC2Snapshot -SnapshotId $SnapshotForRemoval
+        Write-Output "Snapshot $SnapshotForRemoval which belonged to image $ImageForRemoval has been deleted"
     }
 }
 
