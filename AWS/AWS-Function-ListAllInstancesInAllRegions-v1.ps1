@@ -7,29 +7,36 @@ ForEach ( $Region in $Regions )
     {
         $RegionName = $Region.RegionName
         Set-DefaultAWSRegion -Region $RegionName -ErrorAction Stop
-        $Instances = (Get-EC2Instance).Instances # | select ImageId,InstanceType,KeyName,LaunchTime 
-        $InstanceProperties = @{ RegionName = $RegionName
-                                 InstanceID = $Instances.imageid
-                                 InstanceType = $Instances.InstanceType
-                                 KeyName = $Instances.KeyName
-                                 LaunchTime = $Instances.LaunchTime } 
-        $obj = New-Object -TypeName PSObject -Property $InstanceProperties
-        if ($instances.count -gt 0)
-        {    
-            Write-Output $obj
+        $Instances = (Get-EC2Instance).Instances # | select ImageId,InstanceType,KeyName,LaunchTime
+        if ( $instances.count -gt 0 )
+        { 
+            $InstanceProperties = @{ RegionName = $RegionName
+                                     RegionStatus = 'Available'
+                                     InstanceID = $Instances.imageid
+                                     InstanceType = $Instances.InstanceType
+                                     KeyName = $Instances.KeyName
+                                     LaunchTime = $Instances.LaunchTime } 
         }
     }
     catch
     {
-        $InstanceProperties = @{ RegionName = $RegionName
-                                 InstanceID = $null
-                                 InstanceType = $null
-                                 KeyName = $null
-                                 LaunchTime = $null } 
+         $InstanceProperties = @{ RegionName = $RegionName
+                                     RegionStatus = 'Unvailable'
+                                     InstanceID = $null
+                                     InstanceType = $null
+                                     KeyName = $null
+                                     LaunchTime = $null } 
+    }
+    finally
+    {
+       if ( $instances.count -gt 0 )
+       {
             $obj = New-Object -TypeName PSObject -Property $InstanceProperties
-            if ($instances.count -gt 0)
-            {    
-                Write-Output $obj
-            }
+            Write-Output $obj
+       }
+       Else
+       {
+            Write-Host "There are no instances in region $RegionName"
+       }
     }
 }
