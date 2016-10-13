@@ -13,13 +13,15 @@ ForEach ( $Region in $Regions )
         { 
             ForEach ($instance in $Instances) 
             {
+                <#
                 $InstanceProperties = @{RegionName = $RegionName
                                         RegionStatus = 'Available'
                                         InstanceID = $Instance.imageid
                                         InstanceType = $Instance.InstanceType
                                         KeyName = $Instance.KeyName
                                         LaunchTime = $Instance.LaunchTime}
-                # $InstanceProperties = $Instances | select InstanceID,InstanceType,KeyName,LaunchTime | fl
+                #>
+                $InstanceProperties = $Instances | select InstanceID,InstanceType,KeyName,LaunchTime | fl
             }
         }
     }
@@ -37,7 +39,7 @@ ForEach ( $Region in $Regions )
     {
         if ($instances.count -gt 0)
         {
-            $obj = New-Object -TypeName PSObject -Property $InstanceProperties
+            # $obj = New-Object -TypeName PSObject -Property $InstanceProperties
             if ($InstancesCount -eq 1)
             {
                 Write-Output "$InstancesCount instance found in $RegionName"
@@ -46,7 +48,7 @@ ForEach ( $Region in $Regions )
             {
                 Write-Output "$InstancesCount instances found in $RegionName"
             }
-            Write-Output $obj
+            Write-Output $InstanceProperties
         }
         Else
         {
