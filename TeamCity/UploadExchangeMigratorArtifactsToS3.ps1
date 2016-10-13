@@ -7,8 +7,6 @@ Get-S3Object -BucketName $bucket -KeyPrefix "message-handler" -ProfileName devte
 Get-S3Object -BucketName $bucket -KeyPrefix "resource-orchestrator" -ProfileName devtech | % {Remove-S3Object -BucketName $bucket -Key $_.Key  -Force:$true -ProfileName devtech}
 Get-S3Object -BucketName $bucket -KeyPrefix "selfhosted-service" -ProfileName devtech | % {Remove-S3Object -BucketName $bucket -Key $_.Key  -Force:$true -ProfileName devtech}
 Get-S3Object -BucketName $bucket -KeyPrefix "cloudmesh-migrationstatus-service" -ProfileName devtech | % {Remove-S3Object -BucketName $bucket -Key $_.Key  -Force:$true -ProfileName devtech}
-Get-S3Object -BucketName $bucket -KeyPrefix "web-api" -ProfileName devtech | % {Remove-S3Object -BucketName $bucket -Key $_.Key  -Force:$true -ProfileName devtech}
-# Get-S3Object -BucketName $bucket -KeyPrefix "ui" -ProfileName devtech | % {Remove-S3Object -BucketName $bucket -Key $_.Key  -Force:$true -ProfileName devtech}
 
 (Get-ChildItem "%system.teamcity.build.workingDir%/Worker" -Recurse) | % { Write-S3Object -BucketName cloud-migration-platform-dev/exchange-worker -File $_.FullName -Key $_.Name -ProfileName devtech }
 (Get-ChildItem "%system.teamcity.build.workingDir%/MessageHandler" -Recurse) | % { Write-S3Object -BucketName cloud-migration-platform-dev/message-handler -File $_.FullName -Key $_.Name -ProfileName devtech }
@@ -41,30 +39,3 @@ function RecurseFolders([string]$path) {
     RecurseFolders($i.path)
   }
 }
-<#
-$sourceDrive = "%system.teamcity.build.workingDir%/WebApi"
-$sourceFolder = ""
-$sourcePath = $sourceDrive + $sourceFolder
-$s3Bucket = "cloud-migration-platform-dev"
-$s3Folder = "web-api"
-
-# Upload root directory files to S3
-$s3Path = "/" + $s3Folder + "/" + $sourceFolder
-Write-S3Object -BucketName $s3Bucket -Folder $sourcePath -KeyPrefix $s3Path -ProfileName devtech
-
-# Upload sub-directories to S3
-RecurseFolders($sourcePath)
-
-$sourceDrive = "%system.teamcity.build.workingDir%/UI"
-$sourceFolder = ""
-$sourcePath = $sourceDrive + $sourceFolder
-$s3Bucket = "cloud-migration-platform-dev"
-$s3Folder = "ui"
-
-# Upload root directory files to S3
-$s3Path = "/" + $s3Folder + "/" + $sourceFolder
-Write-S3Object -BucketName $s3Bucket -Folder $sourcePath -KeyPrefix $s3Path -ProfileName devtech
-
-# Upload sub-directories to S3
-RecurseFolders($sourcePath)
-#>
