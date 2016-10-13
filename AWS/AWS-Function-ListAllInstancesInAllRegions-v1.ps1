@@ -11,35 +11,18 @@ ForEach ( $Region in $Regions )
         $InstancesCount = $Instances.count 
         if ($InstancesCount -gt 0)
         { 
-            ForEach ($instance in $Instances) 
-            {
-                <#
-                $InstanceProperties = @{RegionName = $RegionName
-                                        RegionStatus = 'Available'
-                                        InstanceID = $Instance.imageid
-                                        InstanceType = $Instance.InstanceType
-                                        KeyName = $Instance.KeyName
-                                        LaunchTime = $Instance.LaunchTime}
-                #>
-                $InstanceProperties = $Instances | select InstanceID,InstanceType,KeyName,LaunchTime | fl
-            }
+            $InstanceProperties = $Instances | select InstanceID,InstanceType,KeyName,LaunchTime | fl
+            
         }
     }
     catch
     {
         Write-Warning "AWS is having problems to connect to region $RegionName"
-        $InstanceProperties = @{RegionName = $RegionName
-                                RegionStatus = 'Unvailable'
-                                InstanceID = $null
-                                InstanceType = $null
-                                KeyName = $null
-                                LaunchTime = $null} 
     }
     finally
     {
         if ($instances.count -gt 0)
         {
-            # $obj = New-Object -TypeName PSObject -Property $InstanceProperties
             if ($InstancesCount -eq 1)
             {
                 Write-Output "$InstancesCount instance found in $RegionName"
