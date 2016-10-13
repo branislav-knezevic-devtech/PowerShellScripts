@@ -17,50 +17,7 @@ $location = Invoke-RestMethod -Uri 'https://ec2-54-93-111-100.eu-central-1.compu
 $creds = New-AWSCredentials -AccessKey %S3AccessKey% -SecretKey %S3SecretKey%
 Set-AWSCredentials -Credential $creds -StoreAs devtech
 
-<#
-$passwordWebServer = convertto-securestring -asplaintext -force -string '%WebServerPassword%'
-$credentialWebServer = new-object -typename system.management.automation.pscredential -argumentlist "\Administrator", $passwordWebServer  
-$sessionWebServer = new-pssession %WebServerInstanceIp% -credential $credentialWebServer 
-
-
-Invoke-Command -Session $sessionWebServer -ScriptBlock {
-    iisreset /stop
-    Remove-Item C:\inetpub\wwwroot\DemoWebApi\* -Force -Recurse
-
-    $filesWebApi = Get-S3Object -BucketName cloud-migration-platform-dev -KeyPrefix web-api -ProfileName devtech
-    $keyPrefix = "web-api/"
-	$localPath = "C:\inetpub\wwwroot\DemoWebApi\"
-	$replace = '^(.*?)'+$keyPrefix
-	foreach($object in $filesWebApi) {
-		$localFileName = $object.Key -replace $replace, '$1'
-		Write-Host $localFileName
-		if ($localFileName -ne '')
-		{
-			$localFilePath = Join-Path $localPath $localFileName
-			Copy-S3Object -BucketName cloud-migration-platform-dev -Key $object.Key -LocalFile $localFilePath -ProfileName devtech
-		}
-	}
-	
-    
-	Remove-Item C:\inetpub\wwwroot\Demo\* -Force -Recurse
-	
-	$filesUI = Get-S3Object -BucketName cloud-migration-platform-dev -KeyPrefix ui -ProfileName devtech
-    $keyPrefix = "ui/"
-	$localPath = "C:\inetpub\wwwroot\Demo\"
-	$replace = '^(.*?)'+$keyPrefix
-	foreach($object in $filesUI) {
-		$localFileName = $object.Key -replace $replace, '$1' 
-		if ($localFileName -ne '')
-		{
-			$localFilePath = Join-Path $localPath $localFileName
-			Copy-S3Object -BucketName cloud-migration-platform-dev -Key $object.Key -LocalFile $localFilePath -ProfileName devtech
-		}
-	}
-    
-    iisreset /start
-}
-Remove-PSSession $sessionWebServer
-#>
+# MigratonStatusChange
 
 $password3 = ConvertTo-SecureString -AsPlainText -Force -String '%MigrationStatusServiceInstancePassword%'
 $credential3 = New-Object -TypeName system.management.automation.pscredential -ArgumentList "\Administrator", $password3
@@ -80,6 +37,8 @@ Invoke-Command -Session $session3 -ScriptBlock {
 	Start-Service $ServiceName
 }
 Remove-PSSession $session3
+
+# MessageHandlers
 
 foreach($handler in $location.MessageHandlers)
 {
@@ -102,6 +61,8 @@ foreach($handler in $location.MessageHandlers)
     Exit-PSSession
 }
 
+# Orchestrator
+
 $passwordO = convertto-securestring -asplaintext -force -string $location.Orchestrator.MachinePassword
 $credentialO = new-object -typename system.management.automation.pscredential -argumentlist "\Administrator", $passwordO  
 $sessionO = new-pssession $location.Orchestrator.PublicIp -credential $credentialO  
@@ -121,6 +82,8 @@ Invoke-Command -Session $sessionO -ScriptBlock {
 }
 Exit-PSSession
 
+
+# WCF
 
 $passwordWCF = ConvertTo-SecureString -AsPlainText -Force -String '%WcfInstancePassword%'
 $credentialWCF = New-Object -TypeName system.management.automation.pscredential -ArgumentList "\Administrator", $passwordWCF
@@ -151,6 +114,8 @@ Invoke-Command -Session $sessionWCF -ScriptBlock {
 	Start-Service $ServiceName
 }
 Remove-PSSession $sessionWCF
+
+# Workers
 
 <#
 foreach($Worker in $location.workers)
