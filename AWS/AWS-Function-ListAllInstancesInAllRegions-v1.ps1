@@ -1,4 +1,4 @@
-﻿# Get all running instances in all regions following Don Jones toomaking part guide
+﻿# Get all running instances in all regions following Don Jones tool making part guide
 
 $Regions = Get-EC2Region
 ForEach ( $Region in $Regions ) 
@@ -12,7 +12,6 @@ ForEach ( $Region in $Regions )
         if ($InstancesCount -gt 0)
         { 
             $InstanceProperties = $Instances | select InstanceID,InstanceType,KeyName,LaunchTime | fl
-            
         }
     }
     catch
@@ -39,6 +38,3 @@ ForEach ( $Region in $Regions )
         }
     }
 }
-
-# for output play with simple select, maybe as | fl
-# with select option script needs to be changed as $obj has to be removed
