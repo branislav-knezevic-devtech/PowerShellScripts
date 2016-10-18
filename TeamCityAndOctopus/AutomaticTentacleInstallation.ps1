@@ -122,5 +122,5 @@
 }
 else
 {
-    Write-Output "Service OctopusDeploy Tentacle already exists and it is in running state"
+    Write-Output "OctopusDeploy Tentacle service already exists"
 }
