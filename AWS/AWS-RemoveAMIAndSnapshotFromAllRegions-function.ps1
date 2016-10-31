@@ -30,9 +30,6 @@ ForEach ($Region in $Regions)
     Finally
     {
         Write-Output "Image $ImageForRemoval has been unregistered in $RegionName"
-        if ($SnapshotForRemoval -notlike $null)
-        {
-            Write-Output "Snapshot $SnapshotForRemoval which belonged to image $ImageForRemoval has been deleted"
-        }
+        Write-Output "Snapshot $SnapshotForRemoval which belonged to image $ImageForRemoval has been deleted"
     }
 }
