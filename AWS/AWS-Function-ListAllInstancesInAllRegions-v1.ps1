@@ -38,3 +38,10 @@ ForEach ( $Region in $Regions )
         }
     }
 }
+
+<#
+can be added here
+BEGIN {}
+PROCESS {}
+END {}
+#>
