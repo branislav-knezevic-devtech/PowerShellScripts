@@ -1,41 +1,57 @@
-﻿#$option = @{1 = 'Option one'
-#            2 = 'Option two'
-#            3 = 'Option three'}
-#Read-Host $option
-#if ($option -eq 1)
-#{
-#    Write-Output $option[0]
-#}
-#if ($option -eq 2)
-#{
-#    Write-Output $option[1]
-#}
-#if ($option -eq 3)
-#{
-#    Write-Output $option[2]
-#}
+﻿<#
+$RegionSelection = @('[1] North Virginia';
+                     '[2] Ohio';
+                     '[3] California';
+                     '[0] Exit')
+#>
 
+$output = $null
 $input = Read-Host -Prompt "Select Region from the list by pressing corresponding number: 
 [1] North Virginia
-[2] Ohio 
+[2] Ohio
 [3] California
+[0] Exit
 You select"
-$output = if ($input -eq '1')
+if ($input -notlike '0')
 {
-    Write-Output "Default region has been set to North Virginia"
-}   
-if ($input -eq '2')
-{
-    Write-Output "Default region has been set to Ohio"
-}  
-if ($input -eq '3')
-{
-    Write-Output "Default region has been set to California"
+    $output = if ($input -eq '1')
+    {
+        Write-Output "Default region has been set to North Virginia"
+    }   
+    if ($input -eq '2')
+    {
+        Write-Output "Default region has been set to Ohio"
+    }  
+    if ($input -eq '3')
+    {
+        Write-Output "Default region has been set to California"
+    }
+    else
+    {
+        Write-Output "Error, please choose from numbers 0 - 3"
+        .\SelectionTest.ps1 
+    }  
 }
-else #(($input -notlike "1") -or ($input -notlike "2") -or ($input -notlike "3"))
+if ($input -eq '0')
 {
-    Write-Output "Error, please choose from numbers 1 - 3"
-    .\SelectionTest.ps1 
-}  
+    Exit
+}
+    Write-Output $output
 
-Write-Output $output
+
+<#
+$allregions = Get-AWSRegion
+$regions = @("[1] $allregions[0].name",
+             "[2] $allregions[1].name",
+             "[3] $allregions[2].name",
+             "[4] $allregions[3].name",
+             "[5] $allregions[4].name",
+             "[6] $allregions[5].name",
+             "[7] $allregions[6].name",
+             "[8] $allregions[7].name",
+             "[9] $allregions[8].name",
+             "[0] Exit")
+Write-Output $regions
+    
+$allregions[8].name        
+#>
