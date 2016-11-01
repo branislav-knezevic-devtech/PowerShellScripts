@@ -6,25 +6,30 @@ $RegionSelection = @('[1] North Virginia';
 #>
 
 $output = $null
+$input = $null
 $input = Read-Host -Prompt "Select Region from the list by pressing corresponding number: 
 [1] North Virginia
 [2] Ohio
 [3] California
 [0] Exit
 You select"
-if ($input -notlike '0')
+if ($input -eq '0')
 {
-    $output = if ($input -eq '1')
+    Exit
+}
+else # ($input -notlike '0')
+{
+    if ($input -eq '1')
     {
-        Write-Output "Default region has been set to North Virginia"
+        $output =  "Default region has been set to North Virginia"
     }   
     if ($input -eq '2')
     {
-        Write-Output "Default region has been set to Ohio"
+        $output = "Default region has been set to Ohio"
     }  
     if ($input -eq '3')
     {
-        Write-Output "Default region has been set to California"
+        $Output = "Default region has been set to California"
     }
     else
     {
@@ -32,11 +37,8 @@ if ($input -notlike '0')
         .\SelectionTest.ps1 
     }  
 }
-if ($input -eq '0')
-{
-    Exit
-}
-    Write-Output $output
+
+Write-Output $output
 
 
 <#
