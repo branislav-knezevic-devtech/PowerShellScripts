@@ -1,0 +1,2 @@
+Get-AWSCredentials -ListStoredCredentials - lists stored profiles
+Initialize-AWSDefaults -ProfileName {MyProfileName} -Region {us-west-2} - use certain profile
