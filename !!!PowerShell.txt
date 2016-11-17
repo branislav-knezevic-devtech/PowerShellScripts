@@ -12,6 +12,34 @@ Get-Service eventlog | gm (or Get-member) - more detailed list of attribudes tha
 Get-Service | Where-Object {($_.StartType -eq "Automatic") -and ($_.Status -eq "Stopped")} | Select Name,Start - using where-object
 show-command <cmdlet> - returns UI for any command
 
+$ExampleText = @"
+Some text
+new line
+another line
+"@ # to put in a block of text
+
+"There are {0} items in folder {1}." -f $numberOfItems, $FolderName # replaces variables in varialbe set order within the sentance
+# -f is used to mark text as formated string
+
+$array = @("jedan","dva",3,4) # formal array formatting 
+
+$hash = @{"key" = "value"}
+$hash = @{1 = "jedan"
+          2 = "dva"
+          3 = "tri"}
+$hash[1] # for hash arrays @{} is used and to show certain member key value must be put in within []
+$hash[4] = "cetiri" # adds value to hash table
+$hash.remove(2) # removes value "2" from the hash table
+$hash.Contains(3) # checks if key "3" is contained within hash array
+$hash.Keys -contains [key] # same thing
+$hash.ContainsValue("dva") # checks if value "dva" is contained with the hash array
+$hash.Value -contains [value] # same thing for values
+
+$PWD # returns current directory
+$HOME # shows home directory of the logged on user
+$Host # returns info about the computer host
+$PSVersionTable # about version of the PowerShell
+
 (get-item "HKLM:\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters").GetValue("HostName") - vraca ime hosta na kojem se VM nalazi
 
 $SessionOptions = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck - skim cert check when connecting
