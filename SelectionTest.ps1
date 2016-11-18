@@ -6,39 +6,40 @@ $RegionSelection = @('[1] North Virginia';
 #>
 
 $output = $null
-$input = $null
-$input = Read-Host -Prompt "Select Region from the list by pressing corresponding number: 
-[1] North Virginia
-[2] Ohio
-[3] California
-[0] Exit
-You select"
-if ($input -eq '0')
+#$input = $null
+DO
 {
-    Exit
-}
-else # ($input -notlike '0')
-{
-    if ($input -eq '1')
+    $input = Read-Host -Prompt "Select Region from the list by pressing corresponding number: 
+    [1] North Virginia
+    [2] Ohio
+    [3] California
+    [0] Exit
+    You select"
+
+    $output = if ($input -eq '1')
     {
-        $output =  "Default region has been set to North Virginia"
+        "Default region has been set to North Virginia"
     }   
     if ($input -eq '2')
     {
-        $output = "Default region has been set to Ohio"
+        "Default region has been set to Ohio"
     }  
     if ($input -eq '3')
     {
-        $Output = "Default region has been set to California"
+       "Default region has been set to California"
     }
-    else
+    if ($input -eq '0')
     {
-        Write-Output "Error, please choose from numbers 0 - 3"
-        .\SelectionTest.ps1 
-    }  
+        Exit
+    }
+    if (($input -notlike "1") -or ($input -notlike "2") -or ($input -notlike "2") -or ($input -notlike "3")) 
+    {
+        "Error, please choose from numbers 0 - 3"
+    } 
+Write-Output $output 
 }
+Until (($input -eq "1") -or ($input -eq "2") -or ($input -eq "3") -or ($input -eq "0"))
 
-Write-Output $output
 
 
 <#

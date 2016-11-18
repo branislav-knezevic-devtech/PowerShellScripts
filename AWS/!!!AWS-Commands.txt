@@ -1,2 +1,6 @@
-Get-AWSCredentials -ListStoredCredentials - lists stored profiles
-Initialize-AWSDefaults -ProfileName {MyProfileName} -Region {us-west-2} - use certain profile
+Get-AWSCredentials -ListStoredCredentials # lists stored profiles
+Initialize-AWSDefaults -ProfileName {MyProfileName} -Region {us-west-2} # use certain profile
+
+set-AWSCredentials -StoreAs [ProfileName] -AccesKey [ACCESSKEY] -SecretKey [SecretKey] # adding profile to AWS SDK
+# initialize command can be used after this
+clear-AWSCredentials -ProfileName # to clear/remove a certain profile
