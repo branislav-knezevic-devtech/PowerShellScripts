@@ -11,26 +11,28 @@ ForEach ( $Region in $Regions )
         $GroupCount = $Groups.count 
         if ($GroupCount -gt 0)
         { 
-            $GroupProperties = $Group | select description,groupID,groupName | fl
+            foreach ($Group in $Groups)
+            {
+                Remove-EC2SecurityGroup -GroupId $group.groupID -Confirm:$false
+            }
         }
     }
     catch
     {
-        Write-Warning "AWS is having problems to connect to region $RegionName"
+        Write-Warning "Unable to delete group $($group.groupID)"
     }
     finally
     {
-        if ($Group.count -gt 0)
+        if ($Groups.count -gt 0)
         {
             if ($GroupCount -eq 1)
             {
-                Write-Output "$GroupCount Group found in $RegionName"
+                Write-Output "$GroupCount group deleted in $RegionName"
             }
             else
             {
-                Write-Output "$GroupCount Groups found in $RegionName"
+                Write-Output "$GroupCount Groups deleted in $RegionName"
             }
-            Write-Output $GroupProperties
         }
         Else
         {
