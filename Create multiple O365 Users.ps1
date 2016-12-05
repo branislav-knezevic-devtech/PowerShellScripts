@@ -1,6 +1,20 @@
 ﻿
-function Create-NewO365Destination
+function New-O365Destination_BK
 {
+    <#
+        .SYNOPSIS
+            Creates users and Public folder mailbox.
+             
+        .DESCRIPTION
+            Creates 25 test users on the newly created domain, assigns them active licenses, and sets impersonation rights to Goran.Manot on the whole domain. 
+            creates new Public Folder Mailbox and assings Owner permissions to Goran.Manot on root public folder.
+    
+        .EXAMPLE
+            New-O365Destination_BK devcmp25
+    
+            Creates 25 users with @devcmp25.onmicrosoft.com domain
+    #>
+
     [CmdletBinding()]
     param 
     (
@@ -10,10 +24,13 @@ function Create-NewO365Destination
                    ValueFromPipelineByPropertyName=$False)]
         [String]$domain 
     )
-    if ($domain -like "devcmp*.onmicrosoft.com")
+    $fullDomain = $domain + ".onmicrosoft.com"
+    if ($fullDomain -like "devcmp*.onmicrosoft.com")
     {
 
         # connect to O365
+        Write-Host "Connecting to O365" -ForegroundColor Cyan
+
         $UserCredential = Get-Credential
         
         Connect-MsolService
@@ -49,6 +66,8 @@ function Create-NewO365Destination
         $users.Add("Randell Fleniken")
         
         # Crate user account from users in the array
+        Write-Host "Creating users on the destination" -ForegroundColor Cyan
+
         foreach ($user in $users) 
         {
             $u = New-Object System.Collections.ArrayList
@@ -57,26 +76,50 @@ function Create-NewO365Destination
             $first = $u[0]
             $last = $u[1]
             
-            $upn = $first + "." + $last + $domain
-            
-            New-MsolUser -FirstName $first -LastName $last -UserPrincipalName $upn -Password m1cr0s0ft$ -DisplayName $user -PasswordNeverExpires $true -ForceChangePassword $false
-            
-            set-msoluser -userprincipalname $upn -usagelocation RS
-            
-            $tenant = (Get-MsolAccountSku).AccountObjectId
-            Set-MsolUserLicense -TenantId $tenant -UserPrincipalName $upn -AddLicenses (Get-MsolAccountSku -TenantId $tenant).AccountSkuId
+            $upn = $first + "." + $last + "@" + $fullDomain
+
+            if ( (Get-MsolUser).userprincipalname -like $upn )
+            {
+                Write-Host "User $upn already exists"
+            }
+            else
+            {
+                New-MsolUser -FirstName $first -LastName $last -UserPrincipalName $upn -Password m1cr0s0ft$ -DisplayName $user -PasswordNeverExpires $true -ForceChangePassword $false | Out-Null
+                Set-MsolUser -userprincipalname $upn -usagelocation RS | Out-Null
+                $tenant = (Get-MsolAccountSku).AccountObjectId
+                Set-MsolUserLicense -TenantId $tenant -UserPrincipalName $upn -AddLicenses (Get-MsolAccountSku -TenantId $tenant).AccountSkuId | Out-Null
+                Write-Output "Created user: $upn"
+            }
+        }
+
+        # create public folder and add permissions to it
+        Write-Host "Creating Public Folder Mailbox" -ForegroundColor Cyan
+
+        if ( (Get-Mailbox -PublicFolder).name -like "PublicFolderMailbox" )
+        {
+            Write-Host 'Public Folder Mailbox with name "PublicfolderMailbox" already exists' -ForegroundColor Yellow
+        }
+        else
+        {
+            New-Mailbox -Name PublicFolderMailbox -PublicFolder | Out-Null
+            Add-PublicFolderClientPermission \ -User goran.manot -AccessRights owner | Out-Null
+            $PFMailbox = (Get-Mailbox -publicfolder).name
+            Write-Output "Public folder Mailbox: $PFMailbox has been created"
         }
     }
     else
     {
         $ErrorText = "Domain must be in devcmpXX.onmicrosoft.com format.
-        Youre entry is: $domain"
+        Youre entry is: $fullDomain"
         Write-Host $ErrorText -ForegroundColor Red
+        break
     }
 
     # apply impersonation rights for goran.manot user on whole domain
+    Write-Host "Applying impersonation rights to Goran.Manot" -ForegroundColor Cyan
+
     Enable-OrganizationCustomization
-    $User = "goran.manot" + $domain
-    New-ManagementRoleAssignment -Role ApplicationImpersonation -User $User
+    $User = "goran.manot" + "@" + $fullDomain
+    New-ManagementRoleAssignment -Role ApplicationImpersonation -User $User | Out-Null
     Remove-PSSession $Session
 }
