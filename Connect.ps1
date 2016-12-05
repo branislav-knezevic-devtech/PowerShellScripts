@@ -1,5 +1,18 @@
 function Connect-O365_BK
 {
+    <#
+        .SYNOPSIS
+            Connects to Office 365
+             
+        .DESCRIPTION
+            Creates remote PowerShell connection to Office 365
+
+        .EXAMPLE
+            Connect-O365_bk devcmp25
+    
+            Connects to Office 365 as  goran.manot@devcmp25.onmicrosoft.com user
+    #>
+
     [CmdletBinding()]
     param 
     (
