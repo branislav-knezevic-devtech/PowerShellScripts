@@ -110,7 +110,7 @@ function New-O365Destination_BK
     else
     {
         $ErrorText = "Domain must be in devcmpXX.onmicrosoft.com format.
-        Youre entry is: $fullDomain"
+        Your entry is: $fullDomain"
         Write-Host $ErrorText -ForegroundColor Red
         break
     }
