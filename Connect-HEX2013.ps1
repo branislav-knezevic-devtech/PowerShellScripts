@@ -12,12 +12,12 @@
         as it has | fl at the end. It would do the same for any get command. 
 
     .EXAMPLE
-        .\Connect-HEX2013.psq amazon.admin
+        .\Connect-HEX2013.ps1 amazon.admin
 
         Connects to Hosted Exchange server 2013 as amazon.admin@amazon.devtech-labs.com
 
     .EXAMPLE
-        .\Connect-HEX2013.ps1 goran.manot
+        .\Connect-HEX2013.ps1
             
         Connects to Hosted Exchange server 2013 as goran.manot@hex2013.devtech-labs.com
 #>
@@ -32,43 +32,44 @@ param
     [String]$Username 
 )
 
-if ( ($username -eq "amazon.admin") -or ($username -eq "google.admin") -or ($username -eq "microsoft.admin")  )
+if ( $username -eq "amazon.admin") 
 {
-    switch ( $Username )
-    {
-        "amazon.admin" { $AdminName = "amazon.admin@amazon.devtech-labs.com" }
-        "google.admin" { $AdminName = "google.admin@google.devtech-labs.com" }
-        "microsoft.admin" { $AdminName = "microsoft.admin@microsoft.devtech-labs.com" }
-		
-        # default { $AdminName = "goran.manot@hex2013.devtech-labs.com" }
-    }
-    
-    $Pass = Get-Content "D:\Credentials\Credentials.txt" | ConvertTo-SecureString
-    $Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $AdminName, $Pass
-    
-    try
-    {
-        $SessionOptions = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
-        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://hex2013.devtech-labs.com/powershell -Authentication Basic -Credential $Cred –SessionOption $SessionOptions
-        Import-PSSession $Session
-    }
-    catch
-    {
-        Write-Output "Connection has failed"
-        Write-Output $Error
-		#Write-Output $_.ErrorID
-        #Write-Output $_.Exception.Message
-        break
-    }
+	$AdminName = "amazon.admin@amazon.devtech-labs.com"
 }
-elseif ($username -eq $null)
+elseif ( $username -eq "google.admin" )
+{
+	$AdminName = "google.admin@google.devtech-labs.com"
+}
+elseif ( $username -eq "microsoft.admin" )
+{
+	$AdminName = "microsoft.admin@microsoft.devtech-labs.com"
+} 
+else 
 {
 	$AdminName = "goran.manot@hex2013.devtech-labs.com"
 }
-else
+
+    
+$Pass = Get-Content "D:\Credentials\Credentials.txt" | ConvertTo-SecureString
+$Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $AdminName, $Pass
+
+try
 {
-    Write-Host "Your have entered the wrong username" -ForegroundColor Red
+    $SessionOptions = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
+    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://hex2013.devtech-labs.com/powershell -Authentication Basic -Credential $Cred –SessionOption $SessionOptions
+    Import-PSSession $Session
 }
+catch
+{
+    Write-Output "Connection has failed"
+    # Write-Output $Error
+    Write-Output $_.ErrorID
+    Write-Output $_.Exception.Message
+    break
+}
+
+
+
 
  
 
