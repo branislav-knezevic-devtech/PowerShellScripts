@@ -1,16 +1,14 @@
-﻿<# 
-    This was originally a function but if it is set that way then it has problems with importing commands. 
-    That can be overcomed by replacing Import-PSSession $Session with: 
-    Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -Global -DisableNameChecking -Force
-    but in that case it returned all commands without formatting, e.g. get-mailbox goran.manot would return result
-    as it has | fl at the end. It would do the same for any get command. 
-#>
-<#
+﻿<#
     .SYNOPSIS
         Connects to HEX2016
          
     .DESCRIPTION
-        Creates remote PowerShell connection to Hosted Exchange Server 2016 as Goran Manot
+        Creates remote PowerShell connection to Hosted Exchange Server 2016 as Goran Manot.
+        This was originally a function but if it is set that way then it has problems with importing commands. 
+        That can be overcomed by replacing Import-PSSession $Session with: 
+        Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -Global -DisableNameChecking -Force
+        but in that case it returned all commands without formatting, e.g. get-mailbox goran.manot would return result
+        as it has | fl at the end. It would do the same for any get command.
 
     .EXAMPLE
         Connect-HEX2016_BK
@@ -18,9 +16,11 @@
         Connects to Hosted Exchange server 2016 as goran.manot@hex2016.devtech-labs.com
 #>
     
-$AdminName = "goran.manot@hex2016.devtech-labs.com"
-$Pass = Get-Content "D:\Credentials\Credentials.txt" | ConvertTo-SecureString
-$Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $AdminName, $Pass
+$fullDomain = "hex2016.devtech-labs.com"
+$AdminName = Get-Content "D:\Credentials\Username.txt"
+$FullAdminName = $AdminName + "@" + $fullDomain
+$Pass = Get-Content "D:\Credentials\Password.txt" | ConvertTo-SecureString
+$Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $FullAdminName, $Pass
 
 try
 {
