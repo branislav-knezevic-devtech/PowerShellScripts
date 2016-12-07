@@ -12,14 +12,14 @@
         as it has | fl at the end. It would do the same for any get command. 
 
     .EXAMPLE
-        .\Connect-HEX2013.ps1 amazon.admin
+        .\Connect-HEX2013.ps1 amazon
 
-        Connects to Hosted Exchange server 2013 as amazon.admin@amazon.devtech-labs.com
+        Connects to Hosted Exchange server 2013 as amazon user
 
     .EXAMPLE
         .\Connect-HEX2013.ps1
             
-        Connects to Hosted Exchange server 2013 as goran.manot@hex2013.devtech-labs.com
+        Connects to Hosted Exchange server 2013 as default admin user (GM)
 #>
 
 [CmdletBinding()]
@@ -47,11 +47,11 @@ elseif ( $username -eq "microsoft" )
 else 
 {
 	$AdminNamePart = "D:\Credentials\Username.txt"
-	$AdminName = $AdminName + "@hex2013.devtech.labs.com"
+	$AdminName = $AdminNamePart + "@hex2013.devtech.labs.com"
 }
 
     
-$Pass = Get-Content "D:\Credentials\Credentials.txt" | ConvertTo-SecureString
+$Pass = Get-Content "D:\Credentials\Password.txt" | ConvertTo-SecureString
 $Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $AdminName, $Pass
 
 try

@@ -3,7 +3,7 @@
         Connects to HEX2016
          
     .DESCRIPTION
-        Creates remote PowerShell connection to Hosted Exchange Server 2016 as Goran Manot.
+        Creates remote PowerShell connection to Hosted Exchange Server 2016 as admin (GM)
         This was originally a function but if it is set that way then it has problems with importing commands. 
         That can be overcomed by replacing Import-PSSession $Session with: 
         Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -Global -DisableNameChecking -Force
@@ -13,7 +13,7 @@
     .EXAMPLE
         Connect-HEX2016_BK
     
-        Connects to Hosted Exchange server 2016 as goran.manot@hex2016.devtech-labs.com
+        Connects to Hosted Exchange server 2016 as primary admin (GM)
 #>
     
 $fullDomain = "hex2016.devtech-labs.com"
