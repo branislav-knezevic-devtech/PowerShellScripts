@@ -117,7 +117,7 @@ Write-Host `n
 Write-Host "Importing Shared mailboxes" 
 Write-Host `n
 
-$SharedMailboxes = Import-CSV -Path D:\ScriptMigration\SharedMailboxes.csv
+$SharedMailboxes = Import-CSV -Path C:\Temp\ScriptMigration\SharedMailboxes.csv
 $SMCounter = $null # should reset the counter if script is run more than once in the same session
 $SharedMailboxes | ForEach-Object {
     $SMFullName = $_.Name
@@ -131,7 +131,6 @@ $SharedMailboxes | ForEach-Object {
         $SMSplitName = $SMFullName.Split(" ")
         $SMFirstName = $SMSplitName[0]
         $SMLastName = $SMSplitName[1]
-            
         New-Mailbox -Shared -FirstName $SMFirstName -LastName $SMLastName -Name $SMFullName -Alias $SMAlias |
         Out-Null
     }
@@ -140,7 +139,7 @@ $SharedMailboxes | ForEach-Object {
         New-Mailbox -Shared -Name $SMFullName -Alias $SMAlias |
         Out-Null
     }
-    }
+}
 
 #Report Number of imported items
 $SMTotalDestination = (Get-Mailbox -ResultSize unlimited -RecipientTypeDetails SharedMailbox).count
@@ -260,7 +259,7 @@ Write-Host `n
 Remove-PSSession -Session $SessionDestination
 
 #Remove CSV Files
-Remove-Item -Path C:\Temp\ScriptMigration -Force -Confirm:$false -Recurse
+# Remove-Item -Path C:\Temp\ScriptMigration -Force -Confirm:$false -Recurse
 
 
 Write-Host `n
