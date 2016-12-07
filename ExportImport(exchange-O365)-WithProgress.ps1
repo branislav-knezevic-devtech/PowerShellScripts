@@ -117,21 +117,29 @@ Write-Host `n
 Write-Host "Importing Shared mailboxes" 
 Write-Host `n
 
-$SharedMailboxes = Import-CSV -Path C:\Temp\ScriptMigration\SharedMailboxes.csv
+$SharedMailboxes = Import-CSV -Path D:\ScriptMigration\SharedMailboxes.csv
 $SMCounter = $null # should reset the counter if script is run more than once in the same session
 $SharedMailboxes | ForEach-Object {
     $SMFullName = $_.Name
-    $SMSplitName = $SMFullName.Split(" ")
-    $SMFirstName = $SMSplitName[0]
-    $SMLastName = $SMSplitName[1]
     $SMAlias = $_.Alias
     $SMTotalImports = $SharedMailboxes.count
     $SMCounter++
     $SMProgress = [int]($SMCounter / $SMTotalImports * 100)
-        Write-Progress -Activity "Importing Shared mailboxes" -Status "Completed $SMCounter of $SMTotalImports" -PercentComplete $SMProgress
-        
+            Write-Progress -Activity "Importing Shared mailboxes" -Status "Completed $SMCounter of $SMTotalImports" -PercentComplete $SMProgress
+    if ( $SMFullName -like "* *" )
+    {
+        $SMSplitName = $SMFullName.Split(" ")
+        $SMFirstName = $SMSplitName[0]
+        $SMLastName = $SMSplitName[1]
+            
         New-Mailbox -Shared -FirstName $SMFirstName -LastName $SMLastName -Name $SMFullName -Alias $SMAlias |
         Out-Null
+    }
+    else
+    {
+        New-Mailbox -Shared -Name $SMFullName -Alias $SMAlias |
+        Out-Null
+    }
     }
 
 #Report Number of imported items
@@ -159,7 +167,7 @@ $Equipment | ForEach-Object {
     }
 
 #Report Number of imported items
-$EQTotalDestination = (Get-Mailbox -ResultSize unlimited -RecipientTypeDetails SharedMailbox).count
+$EQTotalDestination = (Get-Mailbox -ResultSize unlimited -RecipientTypeDetails EquipmentMailbox).count
 Write-Host "Imported $($EQTotalImports) items"
 Write-Host "Total number of Equipment Mailboxes on Destination Server is $($EQTotalDestination)"
 
