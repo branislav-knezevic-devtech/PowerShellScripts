@@ -26,10 +26,11 @@ param
     [int]$DomainNumber 
 )
 
-$fullDomain = "devcmp" + $DomainNumber + ".onmicrosoft.com"
-$AdminName = "goran.manot" + "@" + $fullDomain 
-$Pass = Get-Content "D:\Credentials\Credentials.txt" | ConvertTo-SecureString
-$Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $AdminName, $Pass
+$fullDomain = "devcmp" + $domainNumber + ".onmicrosoft.com"
+$AdminName = Get-Content "D:\Credentials\Username.txt"
+$FullAdminName = $AdminName + "@" + $fullDomain
+$Pass = Get-Content "D:\Credentials\Password.txt" | ConvertTo-SecureString
+$Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $FullAdminName, $Pass
 
 if ($fullDomain -like "devcmp*.onmicrosoft.com")
 {
