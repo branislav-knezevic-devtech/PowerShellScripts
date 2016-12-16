@@ -13,7 +13,7 @@
     .EXAMPLE
         Connect-O365 25
 
-        Connects to Office 365 as  goran.manot@devcmp25.onmicrosoft.com user
+        Connects to Office 365 as  admin (GM) user
 #>
 
 [CmdletBinding()]

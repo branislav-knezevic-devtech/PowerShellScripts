@@ -4,7 +4,7 @@
         Connects to HEX2013
          
     .DESCRIPTION
-        Creates remote PowerShell connection to Hosted Exchange Server 2013. If only script is used, it connects as goran.manot, if some other user is needed, username needs to be specified.
+        Creates remote PowerShell connection to Hosted Exchange Server 2013. If only script is used, it connects as (GM), if some other user is needed, username needs to be specified.
 		This was originally a function but if it is set that way then it has problems with importing commands. 
         That can be overcomed by replacing Import-PSSession $Session with: 
         Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -Global -DisableNameChecking -Force
@@ -38,16 +38,16 @@ if ( $username -eq "amazon")
 }
 elseif ( $username -eq "google" )
 {
-	$AdminName = "D:\Credentials\Username-HEX2013-g.txt"
+	$AdminName = Get-Content "D:\Credentials\Username-HEX2013-g.txt"
 }
 elseif ( $username -eq "microsoft" )
 {
-	$AdminName = "D:\Credentials\Username-HEX2013-m.txt"
+	$AdminName = Get-Content "D:\Credentials\Username-HEX2013-m.txt"
 } 
 else 
 {
-	$AdminNamePart = "D:\Credentials\Username.txt"
-	$AdminName = $AdminNamePart + "@hex2013.devtech.labs.com"
+	$AdminNamePart = Get-Content "D:\Credentials\Username.txt"
+	$AdminName = $AdminNamePart + "@hex2013.devtech-labs.com"
 }
 
     
