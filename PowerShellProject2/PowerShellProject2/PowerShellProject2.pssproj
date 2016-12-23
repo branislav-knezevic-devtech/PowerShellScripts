@@ -31,6 +31,8 @@
     <Compile Include="..\..\AWS\Get-EC2InstanceName_BK.ps1">
       <Link>Get-EC2InstanceName_BK.ps1</Link>
     </Compile>
+    <Compile Include="Connect-O365.ps1" />
+    <Compile Include="ExportImport(exchange-O365)-WithProgress.ps1" />
     <Compile Include="\PowerShellScripts\Connect-HEX2013.ps1">
       <Link>Connect-HEX2013.ps1</Link>
     </Compile>
