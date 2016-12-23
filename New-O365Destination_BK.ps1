@@ -43,30 +43,30 @@ function New-O365Destination_BK
         
         # create an array of users which will be created
         $users = New-Object System.Collections.ArrayList | Out-Null
-        $users.Add("atila bala") | Out-Null
-        $users.Add("nemanja tomic")| Out-Null
-        $users.Add("fedor hajdu") | Out-Null
-        $users.Add("milan stojanovic") | Out-Null
-        $users.Add("slavisa radicevic") | Out-Null
-        $users.Add("paula novokmet") | Out-Null
-        $users.Add("robert sebescen") | Out-Null
-        $users.Add("dragan eremic") | Out-Null
-        $users.Add("vladimir pecanac") | Out-Null
-        $users.Add("milivoj kovacevic") | Out-Null
-        $users.Add("martin jonas") | Out-Null
-        $users.Add("dragana berber") | Out-Null
-        $users.Add("danijel avramov") | Out-Null
-        $users.Add("dejan babic") | Out-Null
-        $users.Add("Babara Harcharik") | Out-Null
-        $users.Add("Brenton Byus") | Out-Null
-        $users.Add("Catrice Hartz") | Out-Null
-        $users.Add("Doris Luening") | Out-Null
-        $users.Add("Ebony Tott") | Out-Null
-        $users.Add("Florentino Snobeck") | Out-Null
-        $users.Add("Ila Lockamy") | Out-Null
-        $users.Add("Lovie Geronime") | Out-Null
-        $users.Add("Lucretia Sangalli") | Out-Null
-        $users.Add("Randell Fleniken") | Out-Null
+        $users.Add("atila bala")
+        $users.Add("nemanja tomic")
+        $users.Add("fedor hajdu") 
+        $users.Add("milan stojanovic") 
+        $users.Add("slavisa radicevic") 
+        $users.Add("paula novokmet") 
+        $users.Add("robert sebescen") 
+        $users.Add("dragan eremic") 
+        $users.Add("vladimir pecanac") 
+        $users.Add("milivoj kovacevic") 
+        $users.Add("martin jonas") 
+        $users.Add("dragana berber") 
+        $users.Add("danijel avramov") 
+        $users.Add("dejan babic") 
+        $users.Add("Babara Harcharik") 
+        $users.Add("Brenton Byus") 
+        $users.Add("Catrice Hartz") 
+        $users.Add("Doris Luening") 
+        $users.Add("Ebony Tott") 
+        $users.Add("Florentino Snobeck") 
+        $users.Add("Ila Lockamy") 
+        $users.Add("Lovie Geronime") 
+        $users.Add("Lucretia Sangalli") 
+        $users.Add("Randell Fleniken") 
         
         # Crate user account from users in the array
         Write-Host "Creating users on the destination" -ForegroundColor Cyan
@@ -221,12 +221,22 @@ function New-O365Destination_BK
 
 
         # create public folder and add permissions to it
+        
         Write-Host "Creating Public Folder Mailbox" -ForegroundColor Cyan
 
-        if ( (Get-Mailbox -PublicFolder).name -like "PublicFolderMailbox" )
+        if ( (Get-Mailbox -PublicFolder) -eq $null)
         {
-            Write-Host 'Public Folder Mailbox with name "PublicfolderMailbox" already exists' -ForegroundColor Yellow
-        }
+            if ( (Get-Mailbox -PublicFolder).name -like "PublicFolderMailbox" )
+            {
+                Write-Host 'Public Folder Mailbox with name "PublicfolderMailbox" already exists' -ForegroundColor Yellow
+            }
+            else
+            {
+                New-Mailbox -Name PublicFolderMailbox -PublicFolder | Out-Null
+                Add-PublicFolderClientPermission \ -User goran.manot -AccessRights owner | Out-Null
+                $PFMailbox = (Get-Mailbox -publicfolder).name
+                Write-Output "Public folder Mailbox: $PFMailbox has been created"
+            }
         else
         {
             New-Mailbox -Name PublicFolderMailbox -PublicFolder | Out-Null
@@ -234,6 +244,8 @@ function New-O365Destination_BK
             $PFMailbox = (Get-Mailbox -publicfolder).name
             Write-Output "Public folder Mailbox: $PFMailbox has been created"
         }
+        Set-OrganizationConfig -DefaultPublicFolderProhibitPostQuota 10737418240
+        Set-OrganizationConfig -DefaultPublicFolderIssueWarningQuota 9663676416
 
         # apply impersonation rights for goran.manot user on whole domain
         Write-Host "Applying impersonation rights to Goran.Manot" -ForegroundColor Cyan
