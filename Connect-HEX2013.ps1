@@ -47,20 +47,12 @@ elseif ( $username -eq "microsoft" )
 	$AdminName = Get-Content "D:\Credentials\Username-HEX2013-m.txt"
     $sessionName = "Microsoft"
 } 
-elseif ( $Username -eq $null ) 
+else
 {
 	$AdminNamePart = Get-Content "D:\Credentials\Username.txt"
 	$AdminName = $AdminNamePart + "@hex2013.devtech-labs.com"
     $sessionName = "HEX2013"
 }
-else
-{
-    if ( ($Username -notlike "amazon") -or ($Username -notlike "google") -or ($Username -notlike "microsoft") -or ($Username -notlike $null) )
-    {
-        Write-Output "You have entered the wrong username. You must enter amazon, google, microsoft or leave it blank"
-    }
-}
-
     
 $Pass = Get-Content "D:\Credentials\Password.txt" | ConvertTo-SecureString
 $Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $AdminName, $Pass
@@ -71,22 +63,24 @@ try
     $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://hex2013.devtech-labs.com/powershell -Authentication Basic -Credential $Cred -Name $sessionName –SessionOption $SessionOptions -ErrorAction stop
 
     Import-PSSession $Session
-    Write-Output "Connected Session is $sessionName"
+    Write-Host "Connected Session is  $sessionName" -ForegroundColor Green
 }
 catch
 {
-    Write-Output "Connection has failed"
-    # Write-Output $Error
-    Write-Output $_.ErrorID
-    Write-Output $_.Exception.Message
+    $loggedError = $_
+    Write-Output "Write-Output "Connection has failed""
+    Write-Output "LoggedError is:" $loggedError.exception.message
+    Write-Output "Number of the line which contans the error:" $loggedError.invocationInfo.scriptLineNumber
+    Write-Output "Line where the error occured:" $loggedError.invocationInfo.line
     break
 }
 
 
-
+    
+    
+   
 
  
-
 
 
 

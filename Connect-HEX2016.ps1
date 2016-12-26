@@ -27,12 +27,15 @@ try
     $SessionOptions = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
     $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://hex2016.devtech-labs.com/powershell -Authentication Basic -Credential $Cred –SessionOption $SessionOptions
     Import-PSSession $Session 
+    Write-Host "Connected to HEX2016" -ForegroundColor Green
 }
 catch
 {
-    Write-Output "Connection has failed"
-    Write-Output $_.ErrorID
-    Write-Output $_.Exception.Message
+    $loggedError = $_
+    Write-Output "Write-Output "Connection has failed""
+    Write-Output "LoggedError is:" $loggedError.exception.message
+    Write-Output "Number of the line which contans the error:" $loggedError.invocationInfo.scriptLineNumber
+    Write-Output "Line where the error occured:" $loggedError.invocationInfo.line
     break
 }
 
