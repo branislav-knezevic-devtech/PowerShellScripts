@@ -10,12 +10,12 @@ PROCESS
             #Set-DefaultAWSRegion -Region $RegionName -ErrorAction Stop
             if ( (Get-EC2Instance -Region $RegionName) -eq $null )
             {
-                $noInstances = "There are no instances in $RegionName"
+                $noInstances = "There are no instances in region: $RegionName"
             }
             else
             {
                 $Instances = Get-EC2Instance -Region $regionName
-                $InstancesCount = $Instances.count 
+                $InstancesCount = $Instances.instances.Count
                 foreach ($i in $Instances)
                 {
                     #$InstanceState = 
@@ -25,7 +25,7 @@ PROCESS
                                              KeyName = $instanceDetail.keyname
                                              LaunchTime = $instanceDetail.launchTime
                                              InstanceState = ($instanceDetail).state.name }
-                    Write-Output $instanceProperties
+                    Write-Output $instanceProperties `n -ErrorAction SilentlyContinue
                 }
             }
 
@@ -33,6 +33,11 @@ PROCESS
         catch
         {
             Write-Warning "AWS is having problems to connect to region $RegionName"
+            $loggedError = $_
+            # Write-Output "Connection has failed"
+            Write-Output "LoggedError is:" $loggedError.exception.message
+            Write-Output "Number of the line which contans the error:" $loggedError.invocationInfo.scriptLineNumber
+            Write-Output "Line where the error occured:" $loggedError.invocationInfo.line
         }
         finally
         {
