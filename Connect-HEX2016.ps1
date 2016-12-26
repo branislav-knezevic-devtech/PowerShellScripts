@@ -19,15 +19,16 @@
 $fullDomain = "hex2016.devtech-labs.com"
 $AdminName = Get-Content "D:\Credentials\Username.txt"
 $FullAdminName = $AdminName + "@" + $fullDomain
+$sessionName = "HEX2016"
 $Pass = Get-Content "D:\Credentials\Password.txt" | ConvertTo-SecureString
 $Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $FullAdminName, $Pass
 
 try
 {
     $SessionOptions = New-PSSessionOption –SkipCACheck –SkipCNCheck –SkipRevocationCheck
-    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://hex2016.devtech-labs.com/powershell -Authentication Basic -Credential $Cred –SessionOption $SessionOptions
+    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://hex2016.devtech-labs.com/powershell -Authentication Basic -Credential $Cred –SessionOption $SessionOptions -Name $sessionName -ErrorAction stop
     Import-PSSession $Session 
-    Write-Host "Connected to HEX2016" -ForegroundColor Green
+    Write-Host "Connected to $sessionName" -ForegroundColor Green
 }
 catch
 {
