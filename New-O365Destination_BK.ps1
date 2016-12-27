@@ -115,8 +115,7 @@ function New-O365Destination_BK
         
         $MailContacts = Import-CSV -Path $CSVPath\MailContacts.csv
         $MCCounter = $null # should reset the counter if script is run more than once in the same session
-        $MailContacts | ForEach-Object 
-        {
+        $MailContacts | ForEach-Object {
             $MCFullName = $_.Name
             $MCSplitName = $MCFullName.Split(" ")
             $MCFirstName = $MCSplitName[0]
@@ -141,10 +140,9 @@ function New-O365Destination_BK
         # Import Shared Mailboxes from CSV
         Write-Host "Importing Shared mailboxes" `n
         
-        $SharedMailboxes = Import-CSV -Path C:\Temp\ScriptMigration\SharedMailboxes.csv
+        $SharedMailboxes = Import-CSV -Path $CSVPath\SharedMailboxes.csv
         $SMCounter = $null # should reset the counter if script is run more than once in the same session
-        $SharedMailboxes | ForEach-Object 
-        {
+        $SharedMailboxes | ForEach-Object {
             $SMFullName = $_.Name
             $SMAlias = $_.Alias
             $SMTotalImports = $SharedMailboxes.count
@@ -178,8 +176,7 @@ function New-O365Destination_BK
         
         $Equipment = Import-CSV -Path $CSVPath\EquipmentMailboxes.csv
         $EQCounter = $null # should reset the counter if script is run more than once in the same session
-        $Equipment | ForEach-Object 
-        {
+        $Equipment | ForEach-Object {
             $EQAlias = $_.Alias
             $EQName = $_.Name
             $EQTotalImports = $Equipment.count
@@ -201,8 +198,7 @@ function New-O365Destination_BK
         
         $Room = Import-CSV -Path $CSVPath\RoomMailboxes.csv
         $RMCounter = $null # should reset the counter if script is run more than once in the same session
-        $Room | ForEach-Object 
-        {
+        $Room | ForEach-Object {
             $RMAlias = $_.Alias
             $RMName = $_.Name
             $RMTotalImports = $Room.count
@@ -237,6 +233,7 @@ function New-O365Destination_BK
                 $PFMailbox = (Get-Mailbox -publicfolder).name
                 Write-Output "Public folder Mailbox: $PFMailbox has been created"
             }
+        }
         else
         {
             New-Mailbox -Name PublicFolderMailbox -PublicFolder | Out-Null
