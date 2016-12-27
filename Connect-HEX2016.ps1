@@ -33,7 +33,7 @@ try
 catch
 {
     $loggedError = $_
-    Write-Output "Write-Output "Connection has failed""
+    Write-Output "Connection has failed"
     Write-Output "LoggedError is:" $loggedError.exception.message
     Write-Output "Number of the line which contans the error:" $loggedError.invocationInfo.scriptLineNumber
     Write-Output "Line where the error occured:" $loggedError.invocationInfo.line
