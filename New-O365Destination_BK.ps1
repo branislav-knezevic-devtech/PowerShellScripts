@@ -35,38 +35,39 @@ function New-O365Destination_BK
 
         $AdminName = Get-Content "D:\Credentials\Username.txt"
         $FullAdminName = $AdminName + "@" + $fullDomain
-        $Pass = Get-Content "D:\Credentials\Password.txt" | ConvertTo-SecureString
-        $Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $FullAdminName, $Pass
-        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $cred -Authentication Basic -AllowRedirection
+        $Password = Get-Content "D:\Credentials\Password.txt" | ConvertTo-SecureString
+        $Cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $FullAdminName, $Password
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $cred -Authentication Basic -AllowRedirection -Name $fullDomain
         Import-PSSession $Session
         Connect-MsolService -Credential $Cred
+        Write-Host "Session established to: $fullDomain" -ForegroundColor Green
         
         # create an array of users which will be created
-        $users = New-Object System.Collections.ArrayList | Out-Null
-        $users.Add("atila bala")
-        $users.Add("nemanja tomic")
-        $users.Add("fedor hajdu") 
-        $users.Add("milan stojanovic") 
-        $users.Add("slavisa radicevic") 
-        $users.Add("paula novokmet") 
-        $users.Add("robert sebescen") 
-        $users.Add("dragan eremic") 
-        $users.Add("vladimir pecanac") 
-        $users.Add("milivoj kovacevic") 
-        $users.Add("martin jonas") 
-        $users.Add("dragana berber") 
-        $users.Add("danijel avramov") 
-        $users.Add("dejan babic") 
-        $users.Add("Babara Harcharik") 
-        $users.Add("Brenton Byus") 
-        $users.Add("Catrice Hartz") 
-        $users.Add("Doris Luening") 
-        $users.Add("Ebony Tott") 
-        $users.Add("Florentino Snobeck") 
-        $users.Add("Ila Lockamy") 
-        $users.Add("Lovie Geronime") 
-        $users.Add("Lucretia Sangalli") 
-        $users.Add("Randell Fleniken") 
+        $users = New-Object System.Collections.ArrayList
+        $users.Add("atila bala") | Out-Null
+        $users.Add("nemanja tomic") | Out-Null
+        $users.Add("fedor hajdu") | Out-Null
+        $users.Add("milan stojanovic") | Out-Null
+        $users.Add("slavisa radicevic") | Out-Null
+        $users.Add("paula novokmet") | Out-Null
+        $users.Add("robert sebescen") | Out-Null
+        $users.Add("dragan eremic") | Out-Null
+        $users.Add("vladimir pecanac") | Out-Null
+        $users.Add("milivoj kovacevic") | Out-Null
+        $users.Add("martin jonas") | Out-Null
+        $users.Add("dragana berber") | Out-Null
+        $users.Add("danijel avramov") | Out-Null
+        $users.Add("dejan babic") | Out-Null
+        $users.Add("Babara Harcharik") | Out-Null
+        $users.Add("Brenton Byus") | Out-Null
+        $users.Add("Catrice Hartz") | Out-Null
+        $users.Add("Doris Luening") | Out-Null
+        $users.Add("Ebony Tott") | Out-Null
+        $users.Add("Florentino Snobeck") | Out-Null
+        $users.Add("Ila Lockamy") | Out-Null
+        $users.Add("Lovie Geronime") | Out-Null
+        $users.Add("Lucretia Sangalli") | Out-Null
+        $users.Add("Randell Fleniken") | Out-Null
         
         # Crate user account from users in the array
         Write-Host "Creating users on the destination" -ForegroundColor Cyan
@@ -87,6 +88,7 @@ function New-O365Destination_BK
             }
             else
             {
+                $pass = Get-Content D:\Credentials\Pass.txt
                 New-MsolUser -FirstName $first -LastName $last -UserPrincipalName $upn -Password $Pass -DisplayName $user -PasswordNeverExpires $true -ForceChangePassword $false | Out-Null
                 Set-MsolUser -userprincipalname $upn -usagelocation RS | Out-Null
                 $tenant = (Get-MsolAccountSku).AccountObjectId
@@ -99,7 +101,7 @@ function New-O365Destination_BK
         DO
         {
             Get-Mailbox
-            Start-Sleep -Seconds 30
+            Start-Sleep -Seconds 10
         }
         until
         (
@@ -109,33 +111,6 @@ function New-O365Destination_BK
         
         # Import data from CSV files
         $CSVPath = "D:\CSV_Data"
-
-        # Import Mail Contacts 
-        Write-Host "Importing External contacs" `n
-        
-        $MailContacts = Import-CSV -Path $CSVPath\MailContacts.csv
-        $MCCounter = $null # should reset the counter if script is run more than once in the same session
-        $MailContacts | ForEach-Object {
-            $MCFullName = $_.Name
-            $MCSplitName = $MCFullName.Split(" ")
-            $MCFirstName = $MCSplitName[0]
-            $MCLastName = $MCSplitName[1]
-            $MCEmail = $_.PrimarySmtpAddress
-            $MCAlias = $_.Alias
-            $MCTotalImports = $MailContacts.count
-            $MCCounter++
-            $MCProgress = [int]($MCCounter / $MCTotalImports * 100)
-                Write-Progress -Activity "Importing Mail Contacts" -Status "Completed $MCCounter of $MCTotalImports" -PercentComplete $MCProgress
-                
-                New-MailContact -FirstName $MCFirstName -LastName $MCLastName -Alias $MCAlias -Name $MCFullName -ExternalEmailAddress $MCEmail |
-                Out-Null
-        }
-        
-        # Report Number of imported items
-        $MCTotalDestination = (Get-MailContact -ResultSize unlimited).count
-        Write-Output "Imported $($MCTotalImports) items"
-        Write-Output "Total number of Mail Contacts on Destination Server is $($MCTotalDestination)"
-
     
         # Import Shared Mailboxes from CSV
         Write-Host "Importing Shared mailboxes" `n
@@ -220,7 +195,7 @@ function New-O365Destination_BK
         
         Write-Host "Creating Public Folder Mailbox" -ForegroundColor Cyan
 
-        if ( (Get-Mailbox -PublicFolder) -eq $null)
+        if ( (Get-Mailbox -PublicFolder) -ne $null)
         {
             if ( (Get-Mailbox -PublicFolder).name -like "PublicFolderMailbox" )
             {
@@ -241,8 +216,8 @@ function New-O365Destination_BK
             $PFMailbox = (Get-Mailbox -publicfolder).name
             Write-Output "Public folder Mailbox: $PFMailbox has been created"
         }
-        Set-OrganizationConfig -DefaultPublicFolderProhibitPostQuota 10737418240
-        Set-OrganizationConfig -DefaultPublicFolderIssueWarningQuota 9663676416
+        Set-OrganizationConfig -DefaultPublicFolderProhibitPostQuota 53687091200
+        Set-OrganizationConfig -DefaultPublicFolderIssueWarningQuota 53687091200
 
         # apply impersonation rights for goran.manot user on whole domain
         Write-Host "Applying impersonation rights to Goran.Manot" -ForegroundColor Cyan
