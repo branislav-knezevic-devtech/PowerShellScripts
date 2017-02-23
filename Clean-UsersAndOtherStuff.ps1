@@ -128,6 +128,7 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
         Write-Output "User $nlupn removed"
     }
     Start-Sleep -Seconds 300
+    Write-Host "Waiting for dust to settle..." -ForegroundColor Cyan
 
     # Import data from CSV files
     $CSVPath = "D:\CSV_Data"
