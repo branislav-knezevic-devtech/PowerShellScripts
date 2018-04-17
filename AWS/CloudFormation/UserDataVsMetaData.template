@@ -1,0 +1,110 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "BK-StagingEnvironment-CMP-CloudFormation",
+
+	"Mappings" : {
+		"Role2InstanceType" : {
+			"Webserver" : {
+				"InstanceType" : "t2.small"
+			},
+			"MessageHandler" : {
+				"InstanceType" : "t2.medium"
+			},
+			"MigrationStatusChange" : {
+				"InstanceType" : "t2.micro"
+			},
+			"WCF" : {
+				"InstanceType" : "t2.micro"
+			},
+			"Mongo" : {
+				"InstanceType" : "t2.small"
+			}
+        },
+        "Region2AMI" : {
+            "us-east-1" : {
+                "AMIID" : "ami-4176943c"
+            },
+            "eu-central-1" : {
+                "AMIID" : "ami-0145276e"
+            },
+            "eu-west-1" : {
+                "AMIID" : "ami-ba522ac3"
+            },
+            "eu-west-2" : {
+                "AMIID" : "ami-15cb2f72"
+            }
+        }
+	},
+
+	"Resources" : {
+		"MigrationStatusChangeStaging" : {
+            "Type" : "AWS::EC2::Instance",
+            "Metadata" : {
+                "AWS::CloudFromation::Init" : {
+                    "configSets" : {
+                        "config" : [
+                            "MetadataScript"
+                        ]
+                    },
+                    "MetadataScript" : {
+                        "MetadataScript" : {
+                            "command" : " powershell.exe md c:\\MetaData; Write-Output \"Skripta je uspela\" | Out-File \"C:\\MetaData\\metaData.txt\" "
+                        }
+                    }
+                }
+            },
+			"Properties" : {
+				"ImageId" : {
+                    "Fn::FindInMap" : [
+                        "Region2AMI", { "Ref" : "AWS::Region" }, "AMIID"
+                    ]
+                },
+				"IamInstanceProfile" : "MigrationStatusChange",
+				"InstanceType" : "t2.micro",
+				"SecurityGroups" : [
+                    { "Ref" : "DeveloperAccessGroup" }
+                ],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "MigrationStatusChange-Staging" 
+					}
+                ],
+                
+                "UserData" :{
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                " <powershell> \n",
+                                " md C:\\UserData \n",
+                                " Write-Output \"Skripta je uspela\" | Out-File \"C:\\UserData\\userData.txt\" \n",
+                                " </powershell> \n"
+                            ]
+                        ]
+                    }
+                }
+			}
+		},
+
+		"DeveloperAccessGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"GroupDescription" : "Developer and deployment access",
+				"SecurityGroupIngress" : [
+					{
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "109.92.130.78/32"
+					},
+                    {
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "93.191.38.154/32"
+					}
+                ]
+                
+			}
+		}
+	}
+}

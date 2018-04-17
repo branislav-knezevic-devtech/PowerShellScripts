@@ -1,0 +1,58 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "BK-StagingEnvironment-CMP-CloudFormation",
+
+	"Mappings" : {
+		"Role2InstanceType" : {
+			"Webserver" : {
+				"InstanceType" : "t2.small"
+			},
+			"MessageHandler" : {
+				"InstanceType" : "t2.medium"
+			},
+			"MigrationStatusChange" : {
+				"InstanceType" : "t2.micro"
+			},
+			"WCF" : {
+				"InstanceType" : "t2.micro"
+			},
+			"Mongo" : {
+				"InstanceType" : "t2.small"
+			}
+        },
+        "Region2AMI" : {
+            "us-east-1" : {
+                "AMIID" : "ami-4176943c"
+            },
+            "eu-central-1" : {
+                "AMIID" : "ami-0145276e"
+            },
+            "eu-west-1" : {
+                "AMIID" : "ami-ba522ac3"
+            },
+            "eu-west-2" : {
+                "AMIID" : "ami-15cb2f72"
+            }
+        }
+	},
+
+	"Resources" : {
+	    "DeveloperAccessGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"GroupDescription" : "Developer and deployment access",
+				"SecurityGroupIngress" : [
+					{
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "109.92.130.78/32"
+					},
+                    {
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "93.191.38.154/32"
+					}
+				]
+			}
+		}
+	}
+}

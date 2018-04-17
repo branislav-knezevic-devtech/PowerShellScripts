@@ -1,0 +1,245 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "BK-StagingEnvironment-CMP-CloudFormation",
+
+	"Parameters" : {
+		"InstanceType" : {
+			"Description" : "Possible instance types for Staging environment",
+			"Type" : "String",
+			"Default" : "t2.micro",
+			"AllowedValues" : [
+				"t2.nano",
+				"t2.micro",
+				"t2.small",
+				"t2.medium"
+			],
+			"ConstraintDescription" : "Must be a valid EC2 instance type"
+		}
+	},
+
+	"Mappings" : {
+		"Role2InstanceType" : {
+			"Webserver" : {
+				"InstanceType" : "t2.small"
+			},
+			"MessageHandler" : {
+				"InstanceType" : "t2.medium"
+			},
+			"MigrationStatusChange" : {
+				"InstanceType" : "t2.micro"
+			},
+			"WCF" : {
+				"InstanceType" : "t2.micro"
+			},
+			"Mongo" : {
+				"InstanceType" : "t2.small"
+			}
+		}
+	},
+
+	"Resources" : {
+		"Webserver-Staging" : {
+			"Type" : "AWS::EC2::Instance",
+			"Properties" : {
+				"ImageId" : "ami-4176943c",
+				"IamInstanceProfile" : "Webserver",
+				"InstanceType" : {
+					"Fn::FindInMap" : [
+						"Role2InstanceType",
+						{
+							"Fn::GetAtt" : [
+								"Webserver-Staging",
+								"IamInstanceProfile"
+							]
+						}
+					]
+				},
+				"SecurityGroups" : [
+					{ "Ref" : "DeveloperAccessGroup" },
+					{ "Ref" : "WebServerGroup" }
+				],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "Webserver-Staging" 
+					}
+				]
+			}
+		},
+		"MigrationStatusChange-Staging" : {
+			"Type" : "AWS::EC2::Instance",
+			"Properties" : {
+				"ImageId" : "ami-4176943c",
+				"IamInstanceProfile" : "MigrationStatusChange",
+				"InstanceType" : {
+					"Fn::FindInMap" : [
+						"Role2InstanceType",
+						{
+							"Fn::GetAtt" : [
+								"MigrationStatusChange-Staging",
+								"IamInstanceProfile"
+							]
+						}
+					]
+				},
+				"SecurityGroups" : [
+					{ "Ref" : "DeveloperAccessGroup" }
+				],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "MigrationStatusChange-Staging" 
+					}
+				]
+			}
+		},
+		"MessageHandler-Staging" : {
+			"Type" : "AWS::EC2::Instance",
+			"Properties" : {
+				"ImageId" : "ami-4176943c",
+				"IamInstanceProfile" : "MessageHandler",
+				"InstanceType" : {
+					"Fn::FindInMap" : [
+						"Role2InstanceType",
+						{
+							"Fn::GetAtt" : [
+								"MessageHandler-Staging",
+								"IamInstanceProfile"
+							]
+						}
+					]
+				},
+				"SecurityGroups" : [
+					{ "Ref" : "DeveloperAccessGroup" }
+				],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "MessageHandler-Staging" 
+					}
+				]
+			}
+		},
+		"Mongo-Staging" : {
+			"Type" : "AWS::EC2::Instance",
+			"Properties" : {
+				"ImageId" : "AMI OF MONGO INSTANCE",
+				"IamInstanceProfile" : "Mongo",
+				"InstanceType" : {
+					"Fn::FindInMap" : [
+						"Role2InstanceType",
+						{
+							"Fn::GetAtt" : [
+								"Mongo-Staging",
+								"IamInstanceProfile"
+							]
+						}
+					]
+				},
+				"SecurityGroups" : [
+					{ "Ref" : "DeveloperAccessGroup" },
+					{ "Ref" : "MongoGroup"}
+				],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "Mongo-Staging" 
+					}
+				]
+			}
+		},
+		"WCF-Staging" : {
+			"Type" : "AWS::EC2::Instance",
+			"Properties" : {
+				"ImageId" : "ami-4176943c",
+				"IamInstanceProfile" : "WCF",
+				"InstanceType" : {
+					"Fn::FindInMap" : [
+						"Role2InstanceType",
+						{
+							"Fn::GetAtt" : [
+								"WCF-Staging",
+								"IamInstanceProfile"
+							]
+						}
+					]
+				},
+				"SecurityGroups" : [
+					{ "Ref" : "DeveloperAccessGroup" }
+				],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "WCF-Staging" 
+					}
+				]
+			}
+		},
+		"DeveloperAccessGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"GroupDescription" : "Developer and deployent access",
+				"SecurityGroupIngress" : [
+					{
+                        "IpProtocol" : "tcp",
+                        "FromPort" : "*",
+                        "ToPort" : "*",
+                        "CidrIp" : "109.92.130.78/32"
+					},
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort" : "*",
+                        "ToPort" : "*",
+                        "CidrIp" : "93.191.38.154/32"
+					}
+				]
+			},
+			"WebserverGroup" : {
+				"Type" : "AWS::EC2::SecurityGroup",
+				"Properties" : {
+					"GroupDescription" : "Access to Webserver",
+					"SecurityGroupIngress" : [
+						{
+							"IpProtocol" : "tcp",
+							"FromPort" : "80",
+							"ToPort" : "80",
+							"CidrIp" : "0.0.0.0/0"
+						
+						},
+						{
+							"IpProtocol" : "tcp",
+							"FromPort" : "443",
+							"ToPort" : "443",
+							"CidrIp" : "0.0.0.0/0"
+						}
+					]
+				}
+			},
+			"MongoGroup" : {
+				"Type" : "AWS::EC2::SecurityGroup",
+				"Properties" : {
+					"GroupDescription" : "Access to Mongo",
+					"SecurityGroupIngress" : [
+						{
+							"IpProtocol" : "tcp",
+							"FromPort" : "21000",
+							"ToPort" : "21000",
+							"CidrIp" : {
+								"Fn::GetAtt" : [
+									"MessageHandler-Staging",
+									"PublicIP"
+								]
+							}
+						}
+					]
+				}
+			}
+		}
+	}
+}

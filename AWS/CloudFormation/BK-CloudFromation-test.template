@@ -1,0 +1,134 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "BK-StagingEnvironment-CMP-CloudFormation",
+
+	"Mappings" : {
+		"Role2InstanceType" : {
+			"Webserver" : {
+				"InstanceType" : "t2.small"
+			},
+			"MessageHandler" : {
+				"InstanceType" : "t2.medium"
+			},
+			"MigrationStatusChange" : {
+				"InstanceType" : "t2.micro"
+			},
+			"WCF" : {
+				"InstanceType" : "t2.micro"
+			},
+			"Mongo" : {
+				"InstanceType" : "t2.small"
+			}
+        },
+        "Region2AMI" : {
+            "us-east-1" : {
+                "AMIID" : "ami-4176943c"
+            },
+            "eu-central-1" : {
+                "AMIID" : "ami-0145276e"
+            },
+            "eu-west-1" : {
+                "AMIID" : "ami-ba522ac3"
+            },
+            "eu-west-2" : {
+                "AMIID" : "ami-15cb2f72"
+            }
+        }
+	},
+
+	"Resources" : {
+		"BKCloudFormation" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+				"ImageId" : {
+                    "Fn::FindInMap" : [
+                        "Region2AMI", { "Ref" : "AWS::Region" }, "AMIID"
+                    ]
+                },
+				"IamInstanceProfile" : "MigrationStatusChange",
+				"InstanceType" : "t2.micro",
+				"SecurityGroups" : [
+                    { "Ref" : "DeveloperAccessGroup" }
+                ],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "BKCloudFormation" 
+					}
+                ],
+                
+                "UserData" :{
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                " <powershell> \n",
+                                " $bucket = \"cloud-migration-platform-dev\" \n",
+                                " $MSCService = \"MigrationStatusChange\" \n",
+                                " $MSCServicePath = \"C:\\cloudmesh-migrationstatus-service\" \n",
+                                " $MSCkey = \"MigrationStatusService.zip\" \n",
+                                " md $MSCServicePath \n",
+                                " Copy-S3Object -BucketName $bucket -Key $MSCkey -LocalFile \"$MSCservicePath\\$MSCkey\" \n",
+                                " Add-Type -AssemblyName System.IO.Compression.FileSystem \n",
+                                " function Unzip ",
+                                " { ",
+                                "     param([string]$zipfile, [string]$outpath) ",
+                                "     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath) ",
+                                " } \n",
+                                " Unzip \"$MSCServicePath\\$MSCkey\" \"$MSCServicePath\" \n",
+                                " Remove-Item \"$MSCServicePath\\$MSCkey\" \n",
+                                " </powershell> \n",
+                                " <script> \n",
+                                " sc create MigrationStatusChange binPath= \"C:\\cloudmesh-migrationstatus-service\\CloudMesh.MigrationStatusChange.WinService.exe\" DisplayName= \"MigrationStatusChange\" \n",
+                                " sc failure MigrationStatusChange reset= 86400 actions= restart/60000/restart/60000/restart/60000 \n",
+                                " sc config MigrationStatusChange start=auto \n",
+                                " shutdown /r /t 30 /f \n",
+                                " </script> \n"
+                            ]
+                        ]
+                    }
+                }
+			}
+		},
+
+		"DeveloperAccessGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"GroupDescription" : "Developer and deployment access",
+				"SecurityGroupIngress" : [
+					{
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "109.92.130.78/32"
+					},
+                    {
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "93.191.38.154/32"
+					}
+                ]
+            }
+		}
+    },
+    
+    "Outputs" : {
+        "MigratorSatusChangePublicIP" : {
+            "Description" : "Public IP of the MigratorStatusChange Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "BKCloudFormation",
+                    "PublicIp"
+                ]
+            }
+        },
+        "MigratorSatusChangePrivateIP" : {
+            "Description" : "Private IP of the MigratorStatusChange Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "BKCloudFormation",
+                    "PrivateIp"
+                ]
+            }
+        }
+    }
+}

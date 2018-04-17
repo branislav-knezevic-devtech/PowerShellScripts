@@ -1,0 +1,252 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "BK-StagingEnvironment-CMP-CloudFormation",
+
+	"Mappings" : {
+		"Role2InstanceType" : {
+			"Webserver" : {
+				"InstanceType" : "t2.small"
+			},
+			"MessageHandler" : {
+				"InstanceType" : "t2.medium"
+			},
+			"MigrationStatusChange" : {
+				"InstanceType" : "t2.micro"
+			},
+			"WCF" : {
+				"InstanceType" : "t2.micro"
+			},
+			"Mongo" : {
+				"InstanceType" : "t2.small"
+			}
+        },
+        "Region2AMI" : {
+            "us-east-1" : {
+                "AMIID" : "ami-4176943c"
+            },
+            "eu-central-1" : {
+                "AMIID" : "ami-0145276e"
+            },
+            "eu-west-1" : {
+                "AMIID" : "ami-ba522ac3"
+            },
+            "eu-west-2" : {
+                "AMIID" : "ami-15cb2f72"
+            }
+        }
+	},
+
+	"Resources" : {
+		"MigrationStatusChangeStaging" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+				"ImageId" : {
+                    "Fn::FindInMap" : [
+                        "Region2AMI", { "Ref" : "AWS::Region" }, "AMIID"
+                    ]
+                },
+				"IamInstanceProfile" : "MigrationStatusChange",
+				"InstanceType" : "t2.micro",
+				"SecurityGroups" : [
+                    { "Ref" : "DeveloperAccessGroup" }
+                ],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "MigrationStatusChangeStaging" 
+					}
+                ],
+                
+                "UserData" :{
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                " <powershell> \n",
+                                " $bucket = \"cloud-migration-platform-staging\" \n",
+                                " $MSCService = \"MigrationStatusChange\" \n",
+                                " $MSCServicePath = \"C:\\cloudmesh-migrationstatus-service\" \n",
+                                " $MSCkey = \"MigrationStatusService.zip\" \n",
+                                " md $MSCServicePath \n",
+                                " Copy-S3Object -BucketName $bucket -Key $MSCkey -LocalFile \"$MSCservicePath\\$MSCkey\" \n",
+                                " Add-Type -AssemblyName System.IO.Compression.FileSystem \n",
+                                " function Unzip ",
+                                " { ",
+                                "     param([string]$zipfile, [string]$outpath) ",
+                                "     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath) ",
+                                " } \n",
+                                " Unzip \"$MSCServicePath\\$MSCkey\" \"$MSCServicePath\" \n",
+                                " Remove-Item \"$MSCServicePath\\$MSCkey\" \n",
+                                " </powershell> \n",
+                                " <script> \n",
+                                " sc create MigrationStatusChange binPath= \"C:\\cloudmesh-migrationstatus-service\\CloudMesh.MigrationStatusChange.WinService.exe\" DisplayName= \"MigrationStatusChange\" \n",
+                                " sc failure MigrationStatusChange reset= 86400 actions= restart/60000/restart/60000/restart/60000 \n",
+                                " sc config MigrationStatusChange start=auto \n",
+                                " shutdown /r /t 30 /f \n",
+                                " </script> \n"
+                            ]
+                        ]
+                    }
+                }
+			}
+        },
+        "MessageHandlerStaging" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+				"ImageId" : {
+                    "Fn::FindInMap" : [
+                        "Region2AMI", { "Ref" : "AWS::Region" }, "AMIID"
+                    ]
+                },
+				"IamInstanceProfile" : "MessageHandler",
+				"InstanceType" : "t2.medium",
+				"SecurityGroups" : [
+                    { "Ref" : "DeveloperAccessGroup" }
+                ],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "MessageHandlerStaging" 
+					}
+                ],
+                
+                "UserData" :{
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                " <powershell> \n",
+                                " $bucket = \"cloud-migration-platform-staging\" \n",
+                                " $MHService = \"MessageHandler\" \n",
+                                " $MHServicePath = \"C:\\message-handler\" \n",
+                                " $MHkey = \"MessageHandler.zip\" \n",
+                                " md $MHServicePath \n",
+                                " Copy-S3Object -BucketName $bucket -Key $MHkey -LocalFile \"$MHservicePath\\$MHkey\" \n",
+                                " Add-Type -AssemblyName System.IO.Compression.FileSystem \n",
+                                " function Unzip ",
+                                " { ",
+                                "     param([string]$zipfile, [string]$outpath) ",
+                                "     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath) ",
+                                " } \n",
+                                " Unzip \"$MHServicePath\\$MHkey\" \"$MHServicePath\" \n",
+                                " Remove-Item \"$MHServicePath\\$MHkey\" \n",
+                                " </powershell> \n",
+                                " <script> \n",
+                                " sc create MessageHandler binPath= \"C:\\message-handler\\ExchangeMigrator.MessageHandlers.WindowsService.exe\" DisplayName= \"MessageHandler\" \n",
+                                " sc failure MessageHandler reset= 86400 actions= restart/60000/restart/60000/restart/60000 \n",
+                                " sc config MessageHandler start=auto \n",
+                                " shutdown /r /t 30 /f \n",
+                                " </script> \n"
+                            ]
+                        ]
+                    }
+                }
+			}
+        },
+        "WCFStaging" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+				"ImageId" : {
+                    "Fn::FindInMap" : [
+                        "Region2AMI", { "Ref" : "AWS::Region" }, "AMIID"
+                    ]
+                },
+				"IamInstanceProfile" : "WCF",
+				"InstanceType" : "t2.micro",
+				"SecurityGroups" : [
+                    { "Ref" : "DeveloperAccessGroup" }
+                ],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "WCFStaging" 
+					}
+                ],
+                
+                "UserData" :{
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                " <powershell> \n",
+                                " $bucket = \"cloud-migration-platform-dev\" \n",
+                                " $WCFService = \"SelfhostedService\" \n",
+                                " $WCFServicePath = \"C:\\Selfhosted-service\" \n",
+                                " $WCFkey = \"SelfHostedService.zip\" \n",
+                                " md $WCFServicePath \n",
+                                " Copy-S3Object -BucketName $bucket -Key $WCFkey -LocalFile \"$WCFservicePath\\$WCFkey\" \n",
+                                " Add-Type -AssemblyName System.IO.Compression.FileSystem \n",
+                                " function Unzip ",
+                                " { ",
+                                "     param([string]$zipfile, [string]$outpath) ",
+                                "     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath) ",
+                                " } \n",
+                                " Unzip \"$WCFservicePath\\$WCFkey\" \"$WCFServicePath\" \n",
+                                " Remove-Item \"$WCFServicePath\\$WCFkey\" \n",
+                                " md C:\\Cert \n",
+                                " Set-Location C:\\Cert \n",
+                                " Read-S3Object -BucketName 'cmp-certs' -Region eu-central-1 -Key 'Staging.cloudmigrationplatform.com.pfx' -File 'Staging.cloudmigrationplatform.com.pfx' \n",
+                                " Read-S3Object -BucketName 'cmp-certs' -Region eu-central-1 -Key 'BindCertificate.bat' -File 'BindCertificate.bat' \n",
+                                " $password = ConvertTo-SecureString 'Birch721Fisher!' -AsPlainText -Force \n",
+                                " Import-PfxCertificate -FilePath C:\\Cert\\Staging.cloudmigrationplatform.com.pfx -CertStoreLocation Cert:\\LocalMachine\\Root -Password $password \n",
+                                " Import-PfxCertificate -FilePath C:\\Cert\\Staging.cloudmigrationplatform.com.pfx -CertStoreLocation Cert:\\LocalMachine\\My -Password $password \n",
+                                " </powershell> \n",
+                                " <script> \n",
+                                " sc create SelfhostedService binPath= \"C:\\cloudmesh-migrationstatus-service\\ExchangeMigrator.WebServiceHost.exe\" DisplayName= \"SelfhostedService\" \n",
+                                " sc failure SelfhostedService reset= 86400 actions= restart/60000/restart/60000/restart/60000 \n",
+                                " sc config SelfhostedService start=auto \n",
+                                " cd 'C:\\Cert\\BindCertificate.bat' \n",
+                                " shutdown /r /t 30 /f \n",
+                                " </script> \n"
+                            ]
+                        ]
+                    }
+                }
+			}
+		}
+    },
+    
+    "Outputs" : {
+        "MigratorSatusChangePublicIP" : {
+            "Description" : "Public IP of the MigratorStatusChange Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "MigrationStatusChangeStaging",
+                    "PublicIp"
+                ]
+            }
+        },
+        "MigratorSatusChangePrivateIP" : {
+            "Description" : "Private IP of the MigratorStatusChange Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "MigrationStatusChangeStaging",
+                    "PrivateIp"
+                ]
+            }
+        },
+        "WCFPublicIP" : {
+            "Description" : "Private IP of the WCF Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "WCFStaging",
+                    "PublicIP"
+                ]
+            }
+        },
+        "MessageHandlerPublicIP" : {
+            "Description" : "Private IP of the MessageHandler Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "MessageHandlerStaging",
+                    "PublicIP"
+                ]
+            }
+        }
+        
+    }
+}

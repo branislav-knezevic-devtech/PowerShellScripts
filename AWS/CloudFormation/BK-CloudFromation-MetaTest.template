@@ -1,0 +1,155 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "BK-StagingEnvironment-CMP-CloudFormation",
+
+	"Mappings" : {
+		"Role2InstanceType" : {
+			"Webserver" : {
+				"InstanceType" : "t2.small"
+			},
+			"MessageHandler" : {
+				"InstanceType" : "t2.medium"
+			},
+			"MigrationStatusChange" : {
+				"InstanceType" : "t2.micro"
+			},
+			"WCF" : {
+				"InstanceType" : "t2.micro"
+			},
+			"Mongo" : {
+				"InstanceType" : "t2.small"
+			}
+        },
+        "Region2AMI" : {
+            "us-east-1" : {
+                "AMIID" : "ami-4176943c"
+            },
+            "eu-central-1" : {
+                "AMIID" : "ami-0145276e"
+            },
+            "eu-west-1" : {
+                "AMIID" : "ami-ba522ac3"
+            },
+            "eu-west-2" : {
+                "AMIID" : "ami-15cb2f72"
+            }
+        }
+	},
+
+	"Resources" : {
+		"BKCloudFormation" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+				"ImageId" : {
+                    "Fn::FindInMap" : [
+                        "Region2AMI", { "Ref" : "AWS::Region" }, "AMIID"
+                    ]
+                },
+				"IamInstanceProfile" : "MigrationStatusChange",
+				"InstanceType" : "t2.micro",
+				"SecurityGroups" : [
+                    { "Ref" : "DeveloperAccessGroup" }
+                ],
+				"KeyName" : "MultiRegionPub",
+				"Tags" : [ 
+					{
+						"Key" : "Name",
+						"Value" : "BKCloudFormation" 
+					}
+                ],
+                "Metadata" : {
+                    "AWS::CloudFormation::Init" : {
+                        "configSets" : {
+                            "MetaTest" : [
+                                "Test1",
+                                "Test2",
+                                "Test3"
+                            ]
+                        },
+                        "Test1" : {
+                            "commands" : {
+                                "Fn::Base64" : {
+                                    "Fn::Join" : [
+                                        "",
+                                        [
+                                            " <powershell> \n",
+                                            " $bucket = \"cloud-migration-platform-dev\" \n",
+                                            " $WCFService = \"SelfhostedService\" \n",
+                                            " $WCFServicePath = \"C:\\Selfhosted-service\" \n",
+                                            " $WCFkey = \"SelfHostedService.zip\" \n",
+                                            " md $WCFServicePath \n",
+                                            " Copy-S3Object -BucketName $bucket -Key $WCFkey -LocalFile \"$WCFservicePath\\$WCFkey\" \n",
+                                            " Add-Type -AssemblyName System.IO.Compression.FileSystem \n",
+                                            " function Unzip ",
+                                            " { ",
+                                            "     param([string]$zipfile, [string]$outpath) ",
+                                            "     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath) ",
+                                            " } \n",
+                                            " Unzip \"$WCFservicePath\\$WCFkey\" \"$WCFServicePath\" \n",
+                                            " Remove-Item \"$WCFServicePath\\$WCFkey\" \n",
+                                            " </powershell> \n"
+                                        ]
+                                    ]
+                                }
+                            }            
+                        }
+                    }
+                },
+                "UserData" :{
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                " <script> \n",
+                                " cfn-init.exe -v -s ", { "Ref" : "AWS::StackId" },
+                                " -r MetaTest ",
+                                " --region ", { "Ref" : "AWS::Region" },
+                                " \n",
+                                " </script> \n"
+                            ]
+                        ]
+                    }
+                }
+			}
+		},
+
+		"DeveloperAccessGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"GroupDescription" : "Developer and deployment access",
+				"SecurityGroupIngress" : [
+					{
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "109.92.130.78/32"
+					},
+                    {
+                        "IpProtocol" : "-1",
+                        "CidrIp" : "93.191.38.154/32"
+					}
+                ]
+            }
+		}
+    },
+    
+    "Outputs" : {
+        "MigratorSatusChangePublicIP" : {
+            "Description" : "Public IP of the MigratorStatusChange Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "BKCloudFormation",
+                    "PublicIp"
+                ]
+            }
+        },
+        "MigratorSatusChangePrivateIP" : {
+            "Description" : "Private IP of the MigratorStatusChange Server",
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "BKCloudFormation",
+                    "PrivateIp"
+                ]
+            }
+        }
+    }
+}

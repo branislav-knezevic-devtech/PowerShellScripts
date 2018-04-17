@@ -38,12 +38,14 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
 
     # Remove existing publicfolders
     Write-Host "Removing public folders" -ForegroundColor Cyan
-    $mbxs = Get-Mailbox -PublicFolder
+    $mbxs = Get-Mailbox -PublicFolder | where {$_.name -notlike "PublicfolderMailbox"}
     foreach ($M in $mbxs)
     {
         Remove-Mailbox -Identity $m.name -PublicFolder -Force -Confirm:$false
         write-output "Mailbox $($m.name) has been removed"
     }
+    Remove-Mailbox -Identity PublicFolderMailbox -PublicFolder -Force -Confirm:$false
+    Write-Output "Mailbox PublicFolderMailbox has been removed"
 
     # create public folder and add permissions to it
     Write-Host "Creating Public Folder Mailbox" -ForegroundColor Cyan

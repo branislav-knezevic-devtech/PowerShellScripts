@@ -39,6 +39,7 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
     {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $cred -Authentication Basic -AllowRedirection -Name $sessionName -ErrorAction Stop
         Import-PSSession $Session
+        Connect-MsolService -Credential $Cred
         write-host "You are connected to: $sessionName" -ForegroundColor Green
     }
     catch

@@ -11,6 +11,8 @@ $variable = @"text text new line text..."@ # here string for large blocks of tex
 Get-Service eventlog | gm (or Get-member) # more detailed list of attribudes than | fl
 Get-Service | Where-Object {($_.StartType -eq "Automatic") -and ($_.Status -eq "Stopped")} | Select Name,Start # using where-object
 show-command <cmdlet> # returns UI for any command
+Get-[any_command] | select -ExpandProperty [property_name] # returns only values for selected property
+# same thing as ([command]).property
 
 $ExampleText = @"
 Some text

@@ -1,0 +1,208 @@
+SELECT name AS ClassName, description 
+FROM Class 
+WHERE personID =3
+/* 
+	name is the name of the column, 
+	ClassName is an alias for this colum how it will be shown in the comments 
+	description is also name of the colum
+	Class is name of the table 
+	personID is person ID from class table (which is related to person table)
+*/
+
+SELECT 1 + 1 AS number --it will complete the operation, result Number | 2
+SELECT userID, classID, userID * classID AS Total, 
+FROM tableName --it will return there columns where third one is a result of first * second
+
+SELECT CONCAT(email, password) --merges two columns e.g. email@address.comPassword
+SELECT CONCAT('Hello ', name, 'Your Email Address is: ', email, 'And your password is: ',password) 
+FROM Password
+/*
+	it returns a result as a sentance (similar like variables in PowerShell)
+*/
+
+SELECT SUBSTR('Example', 2, 3) -- will return 'xam' as 3 characters starting from the 2nd
+SELECT INSTR('Example', 'p') -- will return the position number of the requested character, in this case 5
+SELECT LENGTH(email) -- returns the length of the result
+
+SELECT email, LENGTH(email), INSTR(email, '@'), SUBSTR(email, INSTR(email, '@') + 1, LENGTH(email) - INSTR(email, '@')) 
+FROM person
+/*
+	Select email, it's length, position of @ sign and part of an email which goes after the @ sigh
+	substr(email, - it will return part of an email
+	instr(email, '@') + 1, - position from where it starts
+	length(email) - instr(email, '@')) - how many characters will it return
+*/
+
+SELECT * 
+FROM Person 
+ORDER BY name ASC -- or dsc for descending
+
+SELECT * 
+FROM Person 
+ORDER BY name ASC, type DESC -- multiple order columns can be added
+
+SELECT *
+FROM Person
+WHERE id > 3 -- using where command
+
+SELECT *
+FROM Person
+WHERE totalSpent is NULL -- or 'is not' can be used 
+
+-- null is not considerated as a value, = null won't return any resoluts!!!
+
+LIKE '5[%]'		-- meaning: 5%
+LIKE '5%'		-- meaning: 5 followed by string of 0 or more characters
+LIKE '[_]n'		-- meaning: _n
+LIKE '_n'		-- meaning: an, in, on...
+LIKE '[a-cdf]'	-- meaning: a, b, c, d or first
+LIKE '[-abcdf]' -- meaning: -, a, c, d or f
+
+SELECT *
+FROM Person
+WHERE email 
+LIKE '%gmail.com' -- returns results which have gmail.com in their email
+
+SELECT *
+FROM Person
+WHERE email 
+LIKE '%gmail.com' 
+AND ID = 2 -- AND/OR can be used
+
+SELECT *
+FROM Person
+WHERE id
+IN (
+	2,3
+) -- looks for id which are either 2 or 3, 
+
+SELECT * 
+FROM person
+WHERE ID 
+IN (
+	SELECT personID
+	FROM Class
+	WHERE id
+	IN (
+		1,2
+	)
+) -- from class table, get IDs 1 and 2 and then return person names for those ids
+
+INSERT INTO 'database', 'tableName' (
+	'colum1'
+	'colum2'
+	'colum3'
+	'colum4'
+)
+VALUES (
+	NULL
+	'value2'
+	'value3'
+	'value4'
+) -- add data to table
+
+SELECT classID
+FROM StudentClass
+GROUP BY classID -- whatever is in the GROUP BY clause must be in the SELECT clouse
+
+SELECT classID, max(cost) AS MaxCost
+FROM StudentClass
+GROUP BY classID -- it will return the maximum cost of each classID. min/avg/sum/count can be used as well
+
+SELECT personID, classID, max(cost) AS MaxCost
+FROM StudentClass
+GROUP BY personID, classID -- group by can be used with multiple values
+
+
+-- SUBQUERIES --
+
+SELECT ID, (
+	SELECT Person.Name AS Instructor
+	FROM Person
+	WHERE ID = Class.PersonID
+) AS Instructor, PersonID, Class.Name
+FROM Class -- subquery, obtaining person name from different table
+
+SELECT C.ID, C.PersonID
+FROM (
+	SELECT *
+	FROM Class
+)C -- subquery is aliased as C so first two quaries are actually looking for data from Class table
+
+SELECT *
+FROM (
+	SELECT ID, PersonID, Name
+	FROM Class
+)C -- same as abowe, just the selected fields are in a different place
+
+SELECT ID, PersonID
+FROM Class
+WHERE PersonID IN (
+	SELECT ID
+	FROM Person
+	WHERE Name LIKE 'Sally'
+) -- subquery implemented in WHERE command
+
+
+-- INNER JOINS --
+
+-- there are two separate tables, Class and Person
+
+SELECT *
+FROM Class
+INNER JOIN person ON Person.ID = Class.PersonID 
+/*
+	tells the query that ID from table person (person.id) is the same value as PersonID from class table (Class.PersonID). This will return all the rows from both tables
+*/
+
+SELECT *
+FROM Class
+INNER JOIN person AS Teacher ON Person.ID = Class.PersonID 
+INNER JOIN StudentClass ON StudentClass.ClassID = ClassID
+INNER JOIN Person AS Student ON Student.ID = StudentClass.PersonID
+
+
+-- LEFT OUTER JOINS --
+
+SELECT *
+FROM Person
+LEFT OUTER JOIN Class on Class.PersonID = Person.ID
+/*
+	not sure about the point
+*/
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

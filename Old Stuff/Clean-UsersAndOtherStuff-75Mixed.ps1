@@ -49,39 +49,31 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
         Write-Output "User $rupn removed"
     }
 
-    # create an array of users which will be created
-    $users = New-Object System.Collections.ArrayList
-    $users.Add("atila bala") | Out-Null
-    $users.Add("nemanja tomic") | Out-Null
-    $users.Add("fedor hajdu") | Out-Null
-    $users.Add("milan stojanovic") | Out-Null
-    $users.Add("slavisa radicevic") | Out-Null
-    $users.Add("paula novokmet") | Out-Null
-    $users.Add("robert sebescen") | Out-Null
-    $users.Add("dragan eremic") | Out-Null
-    $users.Add("vladimir pecanac") | Out-Null
-    $users.Add("milivoj kovacevic") | Out-Null
-    $users.Add("martin jonas") | Out-Null
-    $users.Add("dragana berber") | Out-Null
-    $users.Add("danijel avramov") | Out-Null
-    $users.Add("dejan babic") | Out-Null
-    $users.Add("Babara Harcharik") | Out-Null
-    $users.Add("Brenton Byus") | Out-Null
-    $users.Add("Catrice Hartz") | Out-Null
-    $users.Add("Doris Luening") | Out-Null
-    $users.Add("Ebony Tott") | Out-Null
-    $users.Add("Florentino Snobeck") | Out-Null
-    $users.Add("Ila Lockamy") | Out-Null
-    $users.Add("Lovie Geronime") | Out-Null
-    $users.Add("Lucretia Sangalli") | Out-Null
-    $users.Add("Randell Fleniken") | Out-Null
+    # Remove all other items (shared, room, eqipment)
+    Write-Host "Cleaning up other accounts" -ForegroundColor Cyan
+  
+    $NLusers = Get-MsolUser | where {$_.isLicensed -eq $false}
+    foreach ($nlu in $NLusers)
+    {
+        $nlupn = $nlu.userPrincipalName
+        Remove-MsolUser -UserPrincipalName $nlupn -Force | Out-Null
+        Remove-MsolUser -UserPrincipalName $nlupn -RemoveFromRecycleBin -Force | Out-Null
+        Write-Output "User $nlupn removed"
+    }
     
+    Write-Host "Waiting for dust to settle down" -ForegroundColor Cyan
+    Start-Sleep -Seconds 300
+    
+
+    # Import data from CSV files
+    $CSVPath = "D:\CSV_Data"
+
     # Crate user account from users in the array
     Write-Host "Creating users on the destination" -ForegroundColor Cyan
 
-    foreach ($user in $users) 
-    {
-        $u = New-Object System.Collections.ArrayList
+    $75Users = Import-Csv $CSVPath\75users.csv
+    $75Users | ForEach-Object {
+        $User = $_.displayName   
         $u = $user.Split(" ")
     
         $first = $u[0]
@@ -99,8 +91,19 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
             }
             else
             {
-                $license = (Get-MsolAccountSku | where { ($_.activeUnits -eq 25) -or ($_.warningUnits -eq 25) }).accountSkuId
-                Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license | Out-Null
+                $license = Get-MsolAccountSku | where { ($_.consumedUnits -le 25) -and (($_.activeUnits -ge 25) -or ($_.warningUnits -ge 25))}
+                if ($license[0].ConsumedUnits -lt 25)
+                {
+                    Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license[0].AccountSkuId | Out-Null
+                }
+                elseif ($license[0].ConsumedUnits -eq 25 -and ($license[1].ConsumedUnits -lt 25))
+                {
+                    Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license[1].AccountSkuId | Out-Null
+                }
+                elseif (($license[0].ConsumedUnits -eq 25) -and ($license[1].ConsumedUnits -eq 25) -and ($license[2].ConsumedUnits -le 25))
+                {
+                    Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license[2].AccountSkuId | Out-Null
+                }
                 Write-Output "License added to user $upn"
             }
         }
@@ -109,43 +112,25 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
             $Pass = Get-Content "D:\Credentials\Pass.txt"
             New-MsolUser -FirstName $first -LastName $last -UserPrincipalName $upn -Password $Pass -DisplayName $user -PasswordNeverExpires $true -ForceChangePassword $false | Out-Null
             Set-MsolUser -userprincipalname $upn -usagelocation RS | Out-Null
-            $license = (Get-MsolAccountSku | where { ($_.activeUnits -eq 25) -or ($_.warningUnits -eq 25) }).accountSkuId
-            Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license | Out-Null
+            $license = Get-MsolAccountSku | where { ($_.consumedUnits -le 25) -and (($_.activeUnits -ge 25) -or ($_.warningUnits -ge 25))}
+            if ($license[0].ConsumedUnits -lt 25)
+            {
+                Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license[0].AccountSkuId | Out-Null
+            }
+            elseif ($license[0].ConsumedUnits -eq 25 -and ($license[1].ConsumedUnits -lt 25))
+            {
+                Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license[1].AccountSkuId | Out-Null
+            }
+            elseif (($license[0].ConsumedUnits -eq 25) -and ($license[1].ConsumedUnits -eq 25) -and ($license[2].ConsumedUnits -le 25))
+            {
+                Set-MsolUserLicense -UserPrincipalName $upn -AddLicenses $license[2].AccountSkuId | Out-Null
+            }
             Write-Output "Created user: $upn"
         }
     }
 
-    
-    # Remove all other items (shared, room, eqipment)
-    Write-Host "Cleaning up other accounts" -ForegroundColor Cyan
-  
-    $NLusers = Get-MsolUser | where {$_.isLicensed -eq $false}
-    foreach ($nlu in $NLusers)
-    {
-        $nlupn = $nlu.userPrincipalName
-        Remove-MsolUser -UserPrincipalName $nlupn -Force | Out-Null
-        Remove-MsolUser -UserPrincipalName $nlupn -RemoveFromRecycleBin -Force | Out-Null
-        Write-Output "User $nlupn removed"
-    }
-    Write-Host "Waiting for dust to settle..." -ForegroundColor Cyan
-    Start-Sleep -Seconds 300
-
-    # set custom limits to couple of mailboxes
-    # Set-Mailbox -Identity atila.bala -MaxReceiveSize 60mb -MaxSendSize 60mb
-    # Set-Mailbox -Identity nemanja.tomic -MaxReceiveSize 85mb -MaxSendSize 85mb
-    # Set-Mailbox -Identity fedor.hajdu -MaxReceiveSize 110mb -MaxSendSize 110mb
-    # Set-Mailbox -Identity milan.stojanovic -MaxReceiveSize 160mb -MaxSendSize 160mb
-    
-
-    # Disable password expiration for admin account
-    Set-MsolUser -UserPrincipalName $FullAdminName -PasswordNeverExpires $true
-    
-
-    # Import data from CSV files
-    $CSVPath = "E:\CSV_Data"
-
     # Import Shared Mailboxes from CSV
-    Write-Host "Importing Shared mailboxes" `n
+    Write-Host "Importing Shared mailboxes" -ForegroundColor Cyan `n 
     
     $SharedMailboxes = Import-CSV -Path $CSVPath\SharedMailboxes.csv
     $SMCounter = $null # should reset the counter if script is run more than once in the same session
@@ -178,7 +163,7 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
 
     
     # Import Equipment Mailboxes from CSV
-    Write-Host "Importing Equipment Mailboxes" `n
+    Write-Host "Importing Equipment Mailboxes" -ForegroundColor Cyan `n
     
     $Equipment = Import-CSV -Path $CSVPath\EquipmentMailboxes.csv
     $EQCounter = $null # should reset the counter if script is run more than once in the same session
@@ -200,7 +185,7 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
     Write-Output "Total number of Equipment Mailboxes on Destination Server is $($EQTotalDestination)"
     
     # Import Room Mailboxes from CSV
-    Write-Host "Importing Room Mailboxes" `n
+    Write-Host "Importing Room Mailboxes" -ForegroundColor Cyan `n
     
     $Room = Import-CSV -Path $CSVPath\RoomMailboxes.csv
     $RMCounter = $null # should reset the counter if script is run more than once in the same session
@@ -220,9 +205,6 @@ if ($fullDomain -like "devcmp*.onmicrosoft.com")
     $RMTotalDestination = (Get-Mailbox -ResultSize unlimited -RecipientTypeDetails RoomMailbox).count
     Write-Output "Imported $($RMTotalImports) items"
     Write-Output "Total number of Room Mailboxes on Destination Server is $($RMTotalDestination)"
-
-    # set size quota for all mailboxes
-    Get-Mailbox | Set-Mailbox -MaxReceiveSize 1mb -MaxSendSize 1mb
 }
 else
 {
