@@ -69,28 +69,12 @@
                         },
                         "Test1" : {
                             "commands" : {
-                                "Fn::Base64" : {
-                                    "Fn::Join" : [
-                                        "",
-                                        [
-                                            " <powershell> \n",
-                                            " $bucket = \"cloud-migration-platform-dev\" \n",
-                                            " $WCFService = \"SelfhostedService\" \n",
-                                            " $WCFServicePath = \"C:\\Selfhosted-service\" \n",
-                                            " $WCFkey = \"SelfHostedService.zip\" \n",
-                                            " md $WCFServicePath \n",
-                                            " Copy-S3Object -BucketName $bucket -Key $WCFkey -LocalFile \"$WCFservicePath\\$WCFkey\" \n",
-                                            " Add-Type -AssemblyName System.IO.Compression.FileSystem \n",
-                                            " function Unzip ",
-                                            " { ",
-                                            "     param([string]$zipfile, [string]$outpath) ",
-                                            "     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath) ",
-                                            " } \n",
-                                            " Unzip \"$WCFservicePath\\$WCFkey\" \"$WCFServicePath\" \n",
-                                            " Remove-Item \"$WCFServicePath\\$WCFkey\" \n",
-                                            " </powershell> \n"
-                                        ]
-                                    ]
+                                "env" : { "buket" : "cloud-migration-platform-dev" },
+                                "env" : {"WCFService" : "SelfhostedService" }
+                                " $bucket = \"cloud-migration-platform-dev\" \n",
+                                        " $WCFService = \"SelfhostedService\" \n",
+                                        " $WCFServicePath = \"C:\\Selfhosted-service\" \n",
+                                        " $WCFkey = \"SelfHostedService.zip\" \n"
                                 }
                             }            
                         }
